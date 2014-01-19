@@ -118,14 +118,12 @@ public class InCallCardActivity extends Activity {
                 public void onContactInfoComplete(int callId, ContactCacheEntry entry) {
                     mNameTextView.setText(entry.name == null ? entry.number : entry.name);
                     String tmp;
-                    String location;
                     if (MoKeeUtils.isChineseLanguage()) {
                         tmp = PhoneLocation.getCityFromPhone(entry.number);
-                        location = TextUtils.isEmpty(tmp) ? getString(R.string.unknown) : tmp;
                     } else {
                         tmp = TextUtils.isEmpty(entry.location) ? CallerInfo.getGeoDescription(InCallCardActivity.this, entry.number) : entry.location;
-                        location = TextUtils.isEmpty(tmp) ? getString(R.string.unknown) : tmp;
                     }
+                    String location = TextUtils.isEmpty(tmp) ? getString(R.string.unknown) : tmp;
                     mLocationTextView.setText(TextUtils.isEmpty(entry.label) ? location : entry.label + " " + location);
                     if (entry.personUri != null) {
                         CallerInfoUtils.sendViewNotification(InCallCardActivity.this, entry.personUri);
