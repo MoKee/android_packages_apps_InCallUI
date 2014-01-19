@@ -20,10 +20,13 @@ import android.app.Activity;
 import android.content.ContentUris;
 import android.graphics.drawable.Drawable;
 import android.graphics.Bitmap;
+import android.mokee.location.PhoneLocation;
+import android.mokee.util.MoKeeUtils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.provider.Contacts;
+import android.text.TextUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.view.View;
 import android.view.WindowManager;
@@ -46,6 +49,7 @@ public class InCallCardActivity extends Activity {
     private static final int SLIDE_IN_DURATION_MS = 500;
 
     private TextView mNameTextView;
+    private TextView mLocationTextView;
     private ImageView mContactImage;
 
     private Call mCall;
@@ -69,6 +73,7 @@ public class InCallCardActivity extends Activity {
 
         // Setup the fields to show the information of the call
         mNameTextView = (TextView) findViewById(R.id.txt_contact_name);
+        mLocationTextView = (TextView) findViewById(R.id.txt_location);
         mContactImage = (ImageView) findViewById(R.id.img_contact);
 
         // Setup the call button
@@ -112,6 +117,16 @@ public class InCallCardActivity extends Activity {
                 @Override
                 public void onContactInfoComplete(int callId, ContactCacheEntry entry) {
                     mNameTextView.setText(entry.name == null ? entry.number : entry.name);
+                    String tmp;
+                    String location;
+                    if (MoKeeUtils.isChineseLanguage()) {
+                        tmp = PhoneLocation.getCityFromPhone(entry.number);
+                        location = TextUtils.isEmpty(tmp) ? getString(R.string.unknown) : tmp;
+                    } else {
+                        tmp = TextUtils.isEmpty(entry.location) ? CallerInfo.getGeoDescription(InCallCardActivity.this, entry.number) : entry.location;
+                        location = TextUtils.isEmpty(tmp) ? getString(R.string.unknown) : tmp;
+                    }
+                    mLocationTextView.setText(TextUtils.isEmpty(entry.label) ? location : entry.label + " " + location);
                     if (entry.personUri != null) {
                         CallerInfoUtils.sendViewNotification(InCallCardActivity.this, entry.personUri);
                     }
