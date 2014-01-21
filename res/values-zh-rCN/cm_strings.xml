@@ -23,4 +23,7 @@
 
     <!-- In-call screen: status label for a call that is held remotely  -->
     <string name="card_title_waiting_call">等待通话</string>
+    <string name="onscreenBlacklistText">黑名单</string>
+    <string name="blacklist_dialog_title">添加到黑名单</string>
+    <string name="blacklist_dialog_message">来自 <xliff:g id="number">%s</xliff:g> 的来电将会被阻止</string>
 </resources>
