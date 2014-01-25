@@ -665,7 +665,7 @@ public class InCallPresenter implements CallList.Listener {
 
         final PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         // If the screen is on, we'll prefer to not interrupt the user too much and slide in a card
-        if (pm.isScreenOn()) {
+        if (pm.isScreenOn() && !isCallWaiting) {
             Intent intent = new Intent(mContext, InCallCardActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             mContext.startActivity(intent);
