@@ -25,9 +25,9 @@ import android.mokee.util.MoKeeUtils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.provider.Contacts;
 import android.text.TextUtils;
 import android.view.animation.DecelerateInterpolator;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -37,7 +37,6 @@ import android.widget.TextView;
 
 import com.android.incallui.ContactInfoCache.ContactCacheEntry;
 import com.android.incallui.ContactInfoCache.ContactInfoCacheCallback;
-
 import com.android.services.telephony.common.CallIdentification;
 import com.android.services.telephony.common.Call;
 
@@ -139,4 +138,14 @@ public class InCallCardActivity extends Activity {
                 }
             });
     }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent keyEvent) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_BACK:
+                return false;
+        }
+        return super.onKeyDown(keyCode, keyEvent);
+    }
+
 }
