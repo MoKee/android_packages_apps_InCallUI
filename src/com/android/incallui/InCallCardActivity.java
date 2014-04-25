@@ -20,8 +20,6 @@ import android.app.Activity;
 import android.content.ContentUris;
 import android.graphics.drawable.Drawable;
 import android.graphics.Bitmap;
-import android.mokee.location.PhoneLocation;
-import android.mokee.util.MoKeeUtils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -39,6 +37,9 @@ import com.android.incallui.ContactInfoCache.ContactCacheEntry;
 import com.android.incallui.ContactInfoCache.ContactInfoCacheCallback;
 import com.android.services.telephony.common.CallIdentification;
 import com.android.services.telephony.common.Call;
+
+import org.mokee.location.PhoneLocation;
+import org.mokee.util.MoKeeUtils;
 
 /**
  * Handles the call card activity that pops up when a call

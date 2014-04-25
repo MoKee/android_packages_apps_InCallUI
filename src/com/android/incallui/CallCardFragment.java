@@ -25,8 +25,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.mokee.location.PhoneLocation;
-import android.mokee.util.MoKeeUtils;
 import android.os.Bundle;
 import android.telephony.MSimTelephonyManager;
 import android.os.SystemProperties;
@@ -40,6 +38,9 @@ import android.view.ViewStub;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import org.mokee.location.PhoneLocation;
+import org.mokee.util.MoKeeUtils;
 
 import com.android.services.telephony.common.AudioMode;
 import com.android.services.telephony.common.Call;
