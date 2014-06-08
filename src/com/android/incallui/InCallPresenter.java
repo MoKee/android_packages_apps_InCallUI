@@ -70,6 +70,7 @@ public class InCallPresenter implements CallList.Listener {
     private ProximitySensor mProximitySensor;
     private boolean mServiceConnected = false;
     private static String LOG_TAG = "InCallPresenter";
+    VideoCallManager mVideoCallManager;
 
     /**
      * This table is for deciding whether consent is
@@ -154,8 +155,10 @@ public class InCallPresenter implements CallList.Listener {
         // will kick off an update and the whole process can start.
         mCallList.addListener(this);
 
-        // Initialize VideoCallManager. Instantiates the singleton.
-        VideoCallManager.getInstance(mContext);
+        mVideoCallManager = VideoCallManager.getInstance(mContext);
+        final VideoPauseController videoPause = mVideoCallManager.getVideoPauseController();
+        addListener(videoPause);
+        addIncomingCallListener(videoPause);
 
         Log.d(this, "Finished InCallPresenter.setUp");
     }
@@ -377,7 +380,6 @@ public class InCallPresenter implements CallList.Listener {
                 == MSimTelephonyManager.MultiSimVariants.DSDA && (mInCallActivity != null)) {
             mInCallActivity.updateDsdaTab();
         }
-
         if (isActivityStarted()) {
             final boolean hasCall = callList.getActiveOrBackgroundCall() != null ||
                     callList.getOutgoingCall() != null;
@@ -554,6 +556,8 @@ public class InCallPresenter implements CallList.Listener {
         if (showing) {
             mIsActivityPreviouslyStarted = true;
         }
+
+        mVideoCallManager.getVideoPauseController().onUiShowing(showing);
     }
 
     /**
@@ -676,7 +680,7 @@ public class InCallPresenter implements CallList.Listener {
     private void maybeShowErrorDialogOnDisconnect(Call call) {
         // For newly disconnected calls, we may want to show a dialog on specific error conditions
         if (isActivityStarted() && call.getState() == Call.State.DISCONNECTED) {
-            mInCallActivity.maybeShowErrorDialogOnDisconnect(call.getDisconnectCause());
+            mInCallActivity.maybeShowErrorDialogOnDisconnect(call);
         }
     }
 
@@ -906,6 +910,12 @@ public class InCallPresenter implements CallList.Listener {
             // that moment
             // the system may not find any Activity which can accept this Intent
             Log.e(LOG_TAG, "Activity for adding calls isn't found.");
+        }
+    }
+
+    public void onSuppServiceFailed(int service) {
+        if (mInCallActivity != null) {
+            mInCallActivity.onSuppServiceFailed(service);
         }
     }
 
