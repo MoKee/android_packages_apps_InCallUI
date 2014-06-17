@@ -118,7 +118,7 @@ public class InCallCardActivity extends Activity {
                 public void onContactInfoComplete(int callId, ContactCacheEntry entry) {
                     mNameTextView.setText(entry.name == null ? entry.number : entry.name);
                     String tmp;
-                    if (MoKeeUtils.isChineseLanguage()) {
+                    if (MoKeeUtils.isChineseLanguage() && !MoKeeUtils.isTWLanguage()) {
                         tmp = PhoneLocation.getCityFromPhone(entry.number);
                     } else {
                         tmp = TextUtils.isEmpty(entry.location) ? CallerInfo.getGeoDescription(InCallCardActivity.this, entry.number) : entry.location;

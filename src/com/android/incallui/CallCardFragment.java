@@ -265,7 +265,7 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
         // set the name field.
         setPrimaryName(name, nameIsNumber);
 
-        if (MoKeeUtils.isChineseLanguage() && !TextUtils.isEmpty(number) || MoKeeUtils.isChineseLanguage() && nameIsNumber) {
+        if (MoKeeUtils.isChineseLanguage() && !MoKeeUtils.isTWLanguage() && !TextUtils.isEmpty(number) || MoKeeUtils.isChineseLanguage() && !MoKeeUtils.isTWLanguage() && nameIsNumber) {
             String location = PhoneLocation.getCityFromPhone(!nameIsNumber ? number : name);
             setPrimaryPhoneNumber(!nameIsNumber ? number : "", location);
             // Set the label (Mobile, Work, etc) and location
