@@ -17,12 +17,13 @@
 package com.android.incallui;
 
 import android.app.Activity;
-import android.content.ContentUris;
+import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.text.TextUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.view.KeyEvent;
@@ -35,6 +36,7 @@ import android.widget.TextView;
 
 import com.android.incallui.ContactInfoCache.ContactCacheEntry;
 import com.android.incallui.ContactInfoCache.ContactInfoCacheCallback;
+import com.android.internal.telephony.ITelephony;
 import com.android.services.telephony.common.CallIdentification;
 import com.android.services.telephony.common.Call;
 
@@ -42,11 +44,11 @@ import org.mokee.location.PhoneLocation;
 import org.mokee.util.MoKeeUtils;
 
 /**
- * Handles the call card activity that pops up when a call
- * arrives
+ * Handles the call card activity that pops up when a call arrives
  */
 public class InCallCardActivity extends Activity {
     private static final int SLIDE_IN_DURATION_MS = 500;
+    private static String TAG = "InCallCardActivity";
 
     private TextView mNameTextView;
     private TextView mLocationTextView;
@@ -81,8 +83,26 @@ public class InCallCardActivity extends Activity {
         answer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                InCallPresenter.getInstance().startIncomingCallUi(InCallPresenter.InCallState.INCALL);
+                InCallPresenter.getInstance().startIncomingCallUi(
+                        InCallPresenter.InCallState.INCALL);
                 CallCommandClient.getInstance().answerCall(mCall.getCallId());
+                finish();
+            }
+        });
+
+        Button ignore = (Button) findViewById(R.id.btn_ignore);
+        ignore.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                try {
+                    ITelephony telephonyService = getTelephonyService();
+                    if (telephonyService != null) {
+                        telephonyService.silenceRinger();
+                    }
+                } catch (RemoteException ex) {
+                    Log.w(TAG, "RemoteException from getPhoneInterface()" + ex.toString());
+                }
                 finish();
             }
         });
@@ -101,10 +121,15 @@ public class InCallCardActivity extends Activity {
 
         vg.setTranslationY(getResources().getDimensionPixelSize(R.dimen.incoming_call_card_height));
         vg.animate().translationY(0.0f).setDuration(SLIDE_IN_DURATION_MS)
-            .setInterpolator(new DecelerateInterpolator()).start();
+                .setInterpolator(new DecelerateInterpolator()).start();
 
         // Lookup contact info
         startContactInfoSearch(identification);
+    }
+
+    static ITelephony getTelephonyService() {
+        return ITelephony.Stub.asInterface(
+                ServiceManager.checkService(Context.TELEPHONY_SERVICE));
     }
 
     /**
@@ -114,30 +139,32 @@ public class InCallCardActivity extends Activity {
         final ContactInfoCache cache = ContactInfoCache.getInstance(InCallCardActivity.this);
 
         cache.findInfo(identification, true, new ContactInfoCacheCallback() {
-                @Override
-                public void onContactInfoComplete(int callId, ContactCacheEntry entry) {
-                    mNameTextView.setText(entry.name == null ? entry.number : entry.name);
-                    String tmp;
-                    if (MoKeeUtils.isChineseLanguage() && !MoKeeUtils.isTWLanguage()) {
-                        tmp = PhoneLocation.getCityFromPhone(entry.number);
-                    } else {
-                        tmp = TextUtils.isEmpty(entry.location) ? CallerInfo.getGeoDescription(InCallCardActivity.this, entry.number) : entry.location;
-                    }
-                    String location = TextUtils.isEmpty(tmp) ? getString(R.string.unknown) : tmp;
-                    mLocationTextView.setText(TextUtils.isEmpty(entry.label) ? location : entry.label + " " + location);
-                    if (entry.personUri != null) {
-                        CallerInfoUtils.sendViewNotification(InCallCardActivity.this, entry.personUri);
-                    }
+            @Override
+            public void onContactInfoComplete(int callId, ContactCacheEntry entry) {
+                mNameTextView.setText(entry.name == null ? entry.number : entry.name);
+                String tmp;
+                if (MoKeeUtils.isChineseLanguage() && !MoKeeUtils.isTWLanguage()) {
+                    tmp = PhoneLocation.getCityFromPhone(entry.number);
+                } else {
+                    tmp = TextUtils.isEmpty(entry.location) ? CallerInfo.getGeoDescription(
+                            InCallCardActivity.this, entry.number) : entry.location;
                 }
+                String location = TextUtils.isEmpty(tmp) ? getString(R.string.unknown) : tmp;
+                mLocationTextView.setText(TextUtils.isEmpty(entry.label) ? location : entry.label
+                        + " " + location);
+                if (entry.personUri != null) {
+                    CallerInfoUtils.sendViewNotification(InCallCardActivity.this, entry.personUri);
+                }
+            }
 
-                @Override
-                public void onImageLoadComplete(int callId, ContactCacheEntry entry) {
-                    if (entry.photo != null) {
-                        Drawable current = mContactImage.getDrawable();
-                        AnimationUtils.startCrossFade(mContactImage, current, entry.photo);
-                    }
+            @Override
+            public void onImageLoadComplete(int callId, ContactCacheEntry entry) {
+                if (entry.photo != null) {
+                    Drawable current = mContactImage.getDrawable();
+                    AnimationUtils.startCrossFade(mContactImage, current, entry.photo);
                 }
-            });
+            }
+        });
     }
 
     @Override

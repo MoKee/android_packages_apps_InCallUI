@@ -39,78 +39,121 @@
             android:scaleType="centerCrop"
             android:src="@drawable/picture_unknown" />
 
-        <TextView
-            android:id="@+id/txt_contact_name"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_above="@+id/linearLayout"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
             android:layout_marginLeft="8dp"
             android:layout_toRightOf="@+id/img_contact"
-            android:ellipsize="marquee"
-            android:lines="1"
-            android:textColor="@color/incall_call_txt_contact_name"
-            android:textSize="21sp" />
+            android:orientation="vertical" >
 
-        <TextView
-            android:id="@+id/txt_location"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_marginLeft="8dp"
-            android:layout_marginBottom="2dp"
-            android:layout_toRightOf="@+id/img_contact"
-            android:ellipsize="marquee"
-            android:lines="1"
-            android:textColor="@color/incall_call_txt_location"
-            android:layout_below="@id/txt_contact_name"
-            android:layout_alignBottom="@+id/linearLayout"
-            android:textSize="16sp" />
+            <TextView
+                android:id="@+id/txt_contact_name"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:ellipsize="marquee"
+                android:lines="1"
+                android:textColor="@color/incall_call_txt_contact_name"
+                android:textSize="21sp" />
+
+            <TextView
+                android:id="@+id/txt_location"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="2dp"
+                android:layout_weight="1"
+                android:ellipsize="marquee"
+                android:gravity="center_vertical"
+                android:lines="1"
+                android:textColor="@color/incall_call_txt_location"
+                android:textSize="16sp" />
+        </LinearLayout>
 
         <LinearLayout
-            android:orientation="horizontal"
+            android:id="@+id/linearLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
             android:layout_toRightOf="@+id/img_contact"
-            android:id="@+id/linearLayout"
-            android:layout_alignLeft="@+id/txt_location"
-            android:gravity="center_vertical" >
+            android:gravity="center_vertical"
+            android:orientation="horizontal" >
 
-            <Button
-                android:id="@+id/btn_reject"
-                android:layout_width="0dip"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
+            <FrameLayout
                 style="@style/AnswerButtonStyle"
-                android:drawableLeft="@drawable/ic_lockscreen_decline_normal"
-                android:text="@string/description_target_decline"
-                android:textColor="@color/incall_call_btn_reject_txt"
-                android:textSize="13sp"
-                android:ellipsize="none" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" >
+
+                <Button
+                    style="@style/captionOnly"
+		    android:id="@+id/btn_reject"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:drawableLeft="@drawable/ic_lockscreen_decline_normal"
+                    android:ellipsize="none"
+                    android:gravity="center_vertical"
+                    android:text="@string/description_target_decline"
+                    android:textColor="@color/incall_call_btn_reject_txt"
+                    android:textSize="12sp" />
+            </FrameLayout>
 
             <TextView
-                android:id="@+id/separator"
                 android:layout_width="1dp"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="4dp"
-                android:layout_marginRight="4dp"
                 android:background="@color/incall_call_txt_separator"
                 android:maxWidth="0dp" />
 
-            <Button
-                android:id="@+id/btn_answer"
-                android:layout_width="0dip"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
+            <FrameLayout
                 style="@style/AnswerButtonStyle"
-                android:drawableLeft="@drawable/ic_lockscreen_answer_normal"
-                android:text="@string/description_target_answer"
-                android:textColor="@color/incall_call_btn_answer_txt"
-                android:textSize="13sp"
-                android:ellipsize="none" />
-        </LinearLayout>
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" >
 
+                <Button
+                    style="@style/captionOnly"
+		    android:id="@+id/btn_ignore"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:drawableLeft="@drawable/ic_lockscreen_ignore_normal"
+                    android:ellipsize="none"
+                    android:gravity="center_vertical"
+                    android:text="@string/description_target_ignore"
+                    android:textColor="@color/incall_call_btn_ignore_txt"
+                    android:textSize="12sp" />
+            </FrameLayout>
+
+            <TextView
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="@color/incall_call_txt_separator"
+                android:maxWidth="0dp" />
+
+            <FrameLayout
+                style="@style/AnswerButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" >
+
+                <Button
+                    style="@style/captionOnly"
+		    android:id="@+id/btn_answer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:drawableLeft="@drawable/ic_lockscreen_answer_normal"
+                    android:ellipsize="none"
+                    android:gravity="center_vertical"
+                    android:text="@string/description_target_answer"
+                    android:textColor="@color/incall_call_btn_answer_txt"
+                    android:textSize="12sp" />
+            </FrameLayout>
+        </LinearLayout>
     </RelativeLayout>
 
 </LinearLayout>

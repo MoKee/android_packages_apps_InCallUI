@@ -23,5 +23,6 @@
     <color name="incall_call_btn_reject_txt">#000000</color>
     <color name="incall_call_txt_separator">#888888</color>
     <color name="incall_call_btn_answer_txt">#000000</color>
+    <color name="incall_call_btn_ignore_txt">#000000</color>
 
 </resources>
