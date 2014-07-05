@@ -373,4 +373,25 @@ public class CallCommandClient {
         Log.i(this, "get active sub " + subscriptionId);
         return subscriptionId;
     }
+
+    public void setIgnoreCallState(boolean ignored) {
+        if (mCommandService != null) {
+            try {
+                mCommandService.setIgnoreCallState(ignored);
+            } catch (RemoteException e) {
+                Log.e(this, "Error getActiveSub.", e);
+            }
+        }
+    }
+
+    public boolean getIgnoreCallState() {
+        if (mCommandService != null) {
+            try {
+                return mCommandService.getIgnoreCallState();
+            } catch (RemoteException e) {
+                Log.e(this, "Error getActiveSub.", e);
+            }
+        }
+        return false;
+    }
 }

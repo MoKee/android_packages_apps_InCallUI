@@ -355,13 +355,14 @@ public class InCallPresenter implements CallList.Listener {
         InCallState newState = getPotentialStateFromCallList(callList);
         newState = startOrFinishUi(newState);
 
-        // Renable notification shade and soft navigation buttons, if we are no longer in the
+        // Renable notification shade and soft navigation buttons and ignore for non-intrusive, if we are no longer in the
         // incoming call screen
         if (!newState.isIncoming()) {
             if (mAccelerometerListener != null) {
                 mAccelerometerListener.enableSensor(false);
             }
             CallCommandClient.getInstance().setSystemBarNavigationEnabled(true);
+            CallCommandClient.getInstance().setIgnoreCallState(false);
         }
 
         onPhoneStateChange(newState, mInCallState);

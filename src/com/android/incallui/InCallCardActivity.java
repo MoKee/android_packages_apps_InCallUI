@@ -89,7 +89,6 @@ public class InCallCardActivity extends Activity {
                 finish();
             }
         });
-
         Button ignore = (Button) findViewById(R.id.btn_ignore);
         ignore.setOnClickListener(new View.OnClickListener() {
 
@@ -103,10 +102,11 @@ public class InCallCardActivity extends Activity {
                 } catch (RemoteException ex) {
                     Log.w(TAG, "RemoteException from getPhoneInterface()" + ex.toString());
                 }
+                CallCommandClient.getInstance().setSystemBarNavigationEnabled(true);
+                CallCommandClient.getInstance().setIgnoreCallState(true);
                 finish();
             }
         });
-
         Button reject = (Button) findViewById(R.id.btn_reject);
         reject.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -125,11 +125,6 @@ public class InCallCardActivity extends Activity {
 
         // Lookup contact info
         startContactInfoSearch(identification);
-    }
-
-    static ITelephony getTelephonyService() {
-        return ITelephony.Stub.asInterface(
-                ServiceManager.checkService(Context.TELEPHONY_SERVICE));
     }
 
     /**
@@ -174,6 +169,11 @@ public class InCallCardActivity extends Activity {
                 return false;
         }
         return super.onKeyDown(keyCode, keyEvent);
+    }
+
+    static ITelephony getTelephonyService() {
+        return ITelephony.Stub.asInterface(
+                ServiceManager.checkService(Context.TELEPHONY_SERVICE));
     }
 
 }
