@@ -62,9 +62,11 @@ public class InCallCardActivity extends Activity {
 
     private TextView mNameTextView;
     private TextView mLocationTextView;
-    private ImageView mContactImage;
+    private ImageView mContactImageView;
 
     private String mContactName;
+    private String mContactNumber;
+    private String mContactLabel;
     private String mContactLocation;
 
     private Call mCall;
@@ -92,7 +94,7 @@ public class InCallCardActivity extends Activity {
         // Setup the fields to show the information of the call
         mNameTextView = (TextView) findViewById(R.id.txt_contact_name);
         mLocationTextView = (TextView) findViewById(R.id.txt_location);
-        mContactImage = (ImageView) findViewById(R.id.img_contact);
+        mContactImageView = (ImageView) findViewById(R.id.img_contact);
 
         // Setup the call button
         Button answer = (Button) findViewById(R.id.btn_answer);
@@ -149,9 +151,9 @@ public class InCallCardActivity extends Activity {
         final PendingIntent inCallPendingIntent = createLaunchPendingIntent();
         builder.setContentIntent(inCallPendingIntent);
         // set the content
-        builder.setContentText(getString(R.string.notification_ignore_summary, mContactLocation));
+        builder.setContentText(TextUtils.isEmpty(mContactLabel) ? mContactLocation : mContactNumber + " " + mContactLabel + " " + mContactLocation);
         builder.setSmallIcon(R.drawable.ic_block_contact_holo_dark);
-        builder.setContentTitle(getString(R.string.notification_ignore_title, mContactName));
+        builder.setContentTitle(mContactName);
         addHangupAction(builder);
         addAnswerAction(builder);
 
@@ -217,7 +219,8 @@ public class InCallCardActivity extends Activity {
         cache.findInfo(identification, true, new ContactInfoCacheCallback() {
             @Override
             public void onContactInfoComplete(int callId, ContactCacheEntry entry) {
-                mContactName = entry.name == null ? entry.number : entry.name;
+                mContactName = TextUtils.isEmpty(entry.name) ? entry.number : entry.name;
+                mContactNumber = entry.number;
                 mNameTextView.setText(mContactName);
                 String tmp;
                 if (MoKeeUtils.isChineseLanguage() && !MoKeeUtils.isTWLanguage()) {
@@ -226,6 +229,7 @@ public class InCallCardActivity extends Activity {
                     tmp = TextUtils.isEmpty(entry.location) ? CallerInfo.getGeoDescription(
                             mContext, entry.number) : entry.location;
                 }
+                mContactLabel = entry.label;
                 mContactLocation = TextUtils.isEmpty(tmp) ? getString(R.string.unknown) : tmp;
                 mLocationTextView.setText(TextUtils.isEmpty(entry.label) ? mContactLocation : entry.label
                         + " " + mContactLocation);
@@ -237,8 +241,8 @@ public class InCallCardActivity extends Activity {
             @Override
             public void onImageLoadComplete(int callId, ContactCacheEntry entry) {
                 if (entry.photo != null) {
-                    Drawable current = mContactImage.getDrawable();
-                    AnimationUtils.startCrossFade(mContactImage, current, entry.photo);
+                    Drawable current = mContactImageView.getDrawable();
+                    AnimationUtils.startCrossFade(mContactImageView, current, entry.photo);
                 }
             }
         });

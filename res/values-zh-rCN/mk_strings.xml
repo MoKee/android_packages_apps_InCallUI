@@ -17,7 +17,5 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
     <string name="description_target_ignore">忽略</string>
-    <string name="notification_ignore_title">忽略 %1$s 的来电</string>
-    <string name="notification_ignore_summary">归属地信息: %1$s</string>
 
 </resources>
