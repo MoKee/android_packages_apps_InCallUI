@@ -362,7 +362,10 @@ public class InCallPresenter implements CallList.Listener {
                 mAccelerometerListener.enableSensor(false);
             }
             CallCommandClient.getInstance().setSystemBarNavigationEnabled(true);
-            CallCommandClient.getInstance().setIgnoreCallState(false);
+            if (CallCommandClient.getInstance().getIgnoreCallState()) {
+                CallCommandClient.getInstance().setIgnoreCallState(false);
+                InCallCardActivity.hideNotification();
+            }
         }
 
         onPhoneStateChange(newState, mInCallState);

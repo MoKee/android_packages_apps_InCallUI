@@ -22,6 +22,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 
+import com.android.services.telephony.common.Call;
+
 /**
  * Top-level Application class for the InCall app.
  */
@@ -34,6 +36,10 @@ public class InCallApp extends Application {
      */
     public static final String ACTION_HANG_UP_ONGOING_CALL =
             "com.android.incallui.ACTION_HANG_UP_ONGOING_CALL";
+    public static final String ACTION_ANSWER_IGNORED_CALL =
+            "com.android.incallui.ACTION_ANSWER_IGNORED_CALL";
+    public static final String ACTION_REJECT_IGNORED_CALL =
+            "com.android.incallui.ACTION_REJECT_IGNORED_CALL";
     public static final String ADD_CALL_MODE_KEY = "add_call_mode";
     public static final String ADD_PARTICIPANT_KEY = "add_participant";
 
@@ -59,6 +65,8 @@ public class InCallApp extends Application {
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
+            final CallList calls = CallList.getInstance();
+            Call mCall = calls.getIncomingCall();
             Log.i(this, "Broadcast from Notification: " + action);
 
             if (action.equals(ACTION_HANG_UP_ONGOING_CALL)) {
@@ -66,6 +74,10 @@ public class InCallApp extends Application {
                 //       CallController class that has access to CallCommandClient and
                 //       CallList.
                 InCallPresenter.getInstance().hangUpOngoingCall(context);
+            } else if (action.equals(ACTION_ANSWER_IGNORED_CALL)) {
+                CallCommandClient.getInstance().answerCall(mCall.getCallId());
+            } else if (action.equals(ACTION_REJECT_IGNORED_CALL)) {
+                CallCommandClient.getInstance().rejectCall(mCall, false, null);
             }
         }
     }
