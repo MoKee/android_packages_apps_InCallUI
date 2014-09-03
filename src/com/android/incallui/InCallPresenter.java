@@ -144,7 +144,7 @@ public class InCallPresenter implements CallList.Listener {
         mProximitySensor = new ProximitySensor(context, mAudioModeProvider);
         boolean proximityDisabled = Settings.System.getInt(mContext.getContentResolver(),
             Settings.System.INCALL_PROXIMITY_SENSOR_DISABLED, 0) != 0;
-		if (!proximityDisabled) addListener(mProximitySensor);
+        if (!proximityDisabled) addListener(mProximitySensor);
 
         mAccelerometerListener = new AccelerometerListener(context);
 
