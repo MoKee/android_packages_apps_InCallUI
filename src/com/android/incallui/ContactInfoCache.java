@@ -29,7 +29,6 @@ import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
 
 import com.android.dialer.calllog.ContactInfo;
-import com.android.dialer.cmstats.DialerStats;
 import com.android.dialer.lookup.ReverseLookupThread;
 import com.android.incallui.service.PhoneNumberService;
 import com.android.incalluibind.ServiceFactory;
@@ -349,10 +348,6 @@ public class ContactInfoCache implements ContactsAsyncHelper.OnImageLoadComplete
             Log.v(this, "unknown photo");
             entry.photo = null;
         }
-
-        DialerStats.sendEvent(mContext,
-                DialerStats.Categories.INCALL_CONTACT_IMAGE,
-                        entry.photo != null ? "incall_image_found" : "incall_image_not_found");
 
         sendImageNotifications(callId, entry);
         clearCallbacks(callId);
