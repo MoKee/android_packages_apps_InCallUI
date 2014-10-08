@@ -28,7 +28,6 @@
         android:layout_height="wrap_content"
         android:layout_margin="4dp"
         android:background="@drawable/incoming_call_card"
-        android:orientation="vertical"
         android:padding="8dp" >
 
         <ImageView
@@ -49,15 +48,29 @@
             android:layout_toRightOf="@+id/img_contact"
             android:orientation="vertical" >
 
-            <TextView
-                android:id="@+id/txt_contact_name"
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:ellipsize="marquee"
-                android:lines="1"
-                android:textColor="@color/incall_call_txt_contact_name"
-                android:textSize="21sp" />
+                android:layout_weight="1" >
+
+                <TextView
+                    android:id="@+id/txt_contact_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:ellipsize="marquee"
+                    android:lines="1"
+                    android:textColor="@color/incall_call_txt_contact_name"
+                    android:textSize="21sp" />
+
+                <ImageView 
+                    android:id="@+id/iv_subscription"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+		    android:paddingTop="6dp"
+                    android:visibility="gone" />
+            </RelativeLayout>
 
             <TextView
                 android:id="@+id/txt_location"
@@ -90,7 +103,7 @@
 
                 <Button
                     style="@style/captionOnly"
-		    android:id="@+id/btn_reject"
+                    android:id="@+id/btn_reject"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
@@ -116,7 +129,7 @@
 
                 <Button
                     style="@style/captionOnly"
-		    android:id="@+id/btn_ignore"
+                    android:id="@+id/btn_ignore"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
@@ -142,7 +155,7 @@
 
                 <Button
                     style="@style/captionOnly"
-		    android:id="@+id/btn_answer"
+                    android:id="@+id/btn_answer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"

@@ -28,6 +28,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.telephony.MSimTelephonyManager;
 import android.text.TextUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.view.KeyEvent;
@@ -63,6 +64,7 @@ public class InCallCardActivity extends Activity {
     private TextView mNameTextView;
     private TextView mLocationTextView;
     private ImageView mContactImageView;
+    private ImageView mSubscriptionImageView;
 
     private String mContactName;
     private String mContactNumber;
@@ -95,6 +97,19 @@ public class InCallCardActivity extends Activity {
         mNameTextView = (TextView) findViewById(R.id.txt_contact_name);
         mLocationTextView = (TextView) findViewById(R.id.txt_location);
         mContactImageView = (ImageView) findViewById(R.id.img_contact);
+        mSubscriptionImageView = (ImageView) findViewById(R.id.iv_subscription);
+        
+        if (MSimTelephonyManager.getDefault().isMultiSimEnabled()) {
+            mSubscriptionImageView.setVisibility(ImageView.VISIBLE);
+            switch(mCall.getSubscription()) {
+                case 0:
+                    mSubscriptionImageView.setImageResource(R.drawable.ic_sim_icon_1);
+                    break;
+                case 1:
+                    mSubscriptionImageView.setImageResource(R.drawable.ic_sim_icon_2);
+                    break;
+            }
+        }
 
         // Setup the call button
         Button answer = (Button) findViewById(R.id.btn_answer);
