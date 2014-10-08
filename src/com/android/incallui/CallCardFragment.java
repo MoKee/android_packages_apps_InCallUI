@@ -343,7 +343,6 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
         } else {
             mNumberLabel.setVisibility(View.GONE);
         }
-
     }
 
     @Override
