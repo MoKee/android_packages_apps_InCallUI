@@ -98,7 +98,7 @@ public class InCallCardActivity extends Activity {
         mLocationTextView = (TextView) findViewById(R.id.txt_location);
         mContactImageView = (ImageView) findViewById(R.id.img_contact);
         mSubscriptionImageView = (ImageView) findViewById(R.id.iv_subscription);
-        
+
         if (MSimTelephonyManager.getDefault().isMultiSimEnabled()) {
             mSubscriptionImageView.setVisibility(ImageView.VISIBLE);
             switch(mCall.getSubscription()) {
