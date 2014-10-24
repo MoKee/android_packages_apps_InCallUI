@@ -374,7 +374,6 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
 
         showCallTypeLabel(isSipCall, isForwarded);
         MSimTelephonyManager tm = MSimTelephonyManager.getDefault();
-        int numPhones = tm.getPhoneCount();
 
         if (tm.isMultiSimEnabled() && !(tm.getMultiSimConfiguration()
                 == MSimTelephonyManager.MultiSimVariants.DSDA)) {
@@ -388,6 +387,8 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
                         .getContentResolver(), multiSimName + (subscription + 1));
                 showSubscriptionInfo(simName);
             }
+        }  else {
+            mSubscriptionId.setVisibility(View.GONE);
         }
 
         if (! isVideo) {
