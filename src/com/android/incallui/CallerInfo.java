@@ -23,6 +23,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Bundle;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Data;
@@ -46,6 +47,9 @@ import java.util.Locale;
 public class CallerInfo {
     private static final String TAG = "CallerInfo";
 
+    private static final Uri CONTENT_URI = Uri.parse("content://geocoded_location/location");
+    private static final String METHOD_GET_LOCATION = "getLocation";
+    private static final String RESULT_LOCATION = "location";
     /**
      * Please note that, any one of these member variables can be null,
      * and any accesses to them should be prepared to handle such a case.
@@ -331,8 +335,9 @@ public class CallerInfo {
     // should set the phone number to the dialed number and name to
     // 'Emergency Number' and let the UI make the decision about what
     // should be displayed.
-    /* package */ CallerInfo markAsEmergency(Context context) {
-        phoneNumber = context.getString(R.string.emergency_call_dialog_number_for_display);
+    /* package */ CallerInfo markAsEmergency(Context context, String number) {
+        phoneNumber = context.getString(R.string.emergency_call_dialog_number_for_display) + " "
+                + number;
         photoResource = R.drawable.img_phone;
         mIsEmergency = true;
         return this;
@@ -469,7 +474,15 @@ public class CallerInfo {
      */
     public void updateGeoDescription(Context context, String fallbackNumber) {
         String number = TextUtils.isEmpty(phoneNumber) ? fallbackNumber : phoneNumber;
-        geoDescription = getGeoDescription(context, number);
+        String address = null;
+        if (context.getContentResolver().acquireProvider(CONTENT_URI) != null) {
+            Bundle result = context.getContentResolver().call(CONTENT_URI, METHOD_GET_LOCATION,
+                    number, null);
+            if (result != null) {
+                address = result.getString(RESULT_LOCATION);
+            }
+        }
+        geoDescription = (address == null ? getGeoDescription(context, number) : address);
     }
 
     /**

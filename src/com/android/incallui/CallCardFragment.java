@@ -22,18 +22,29 @@ import android.animation.AnimatorSet;
 import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.ContentResolver;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
+import android.media.AudioManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.provider.Settings;
 import android.telecom.DisconnectCause;
 import android.telecom.VideoProfile;
 import android.telephony.PhoneNumberUtils;
+import android.text.format.DateUtils;
 import android.text.TextUtils;
 import android.view.Display;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.View.OnLayoutChangeListener;
 import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
@@ -46,6 +57,9 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import android.telecom.AudioState;
 
 import com.android.contacts.common.widget.FloatingActionButtonController;
 import com.android.phone.common.animation.AnimUtils;
@@ -84,6 +98,12 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
     // Container view that houses the primary call information
     private ViewGroup mPrimaryCallInfo;
     private View mCallButtonsContainer;
+    private ImageButton mVBButton;
+    private AudioManager mAudioManager;
+    private Toast mVBNotify;
+    private int mVBToastPosition;
+    private TextView mRecordingTimeLabel;
+    private TextView mRecordingIcon;
 
     // Secondary caller info
     private View mSecondaryCallInfo;
@@ -112,6 +132,20 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
 
     private int mVideoAnimationDuration;
 
+    private String mRecordingTime;
+
+    private static final int TTY_MODE_OFF = 0;
+    private static final int TTY_MODE_HCO = 2;
+
+    private static final String VOLUME_BOOST = "volume_boost";
+
+    private static final String RECORD_STATE_CHANGED =
+            "com.qualcomm.qti.phonefeature.RECORD_STATE_CHANGED";
+
+    private static final int MESSAGE_TIMER = 1;
+
+    private InCallActivity mInCallActivity;
+
     @Override
     CallCardPresenter.CallCardUi getUi() {
         return this;
@@ -135,6 +169,22 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
                 R.dimen.end_call_floating_action_button_diameter);
         mFabSmallDiameter = getResources().getDimensionPixelOffset(
                 R.dimen.end_call_floating_action_button_small_diameter);
+
+        mVBToastPosition = Integer.parseInt(
+                getResources().getString(R.string.volume_boost_toast_position));
+
+        mAudioManager = (AudioManager) getActivity()
+                .getSystemService(Context.AUDIO_SERVICE);
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(RECORD_STATE_CHANGED);
+        getActivity().registerReceiver(recorderStateReceiver, filter);
+
+        mInCallActivity = (InCallActivity)getActivity();
+
+        if (mInCallActivity.isCallRecording()) {
+            recorderHandler.sendEmptyMessage(MESSAGE_TIMER);
+        }
     }
 
 
@@ -224,6 +274,13 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
 
         mPrimaryName.setElegantTextHeight(false);
         mCallStateLabel.setElegantTextHeight(false);
+
+        mVBButton = (ImageButton) view.findViewById(R.id.volumeBoost);
+        if (null != mVBButton) {
+            mVBButton.setOnClickListener(mVBListener);
+        }
+        mRecordingTimeLabel = (TextView) view.findViewById(R.id.recordingTime);
+        mRecordingIcon = (TextView) view.findViewById(R.id.recordingIcon);
     }
 
     @Override
@@ -494,6 +551,8 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
         CharSequence callStateLabel = getCallStateLabelFromState(state, videoState,
                 sessionModificationState, disconnectCause, connectionLabel, isGatewayCall);
 
+        updateVBbyCall(state);
+
         Log.v(this, "setCallState " + callStateLabel);
         Log.v(this, "DisconnectCause " + disconnectCause.toString());
         Log.v(this, "gateway " + connectionLabel + gatewayNumber);
@@ -510,6 +569,7 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
             mCallStateLabel.setVisibility(View.VISIBLE);
 
             if (connectionIcon == null) {
+                mCallStateIcon.clearAnimation();
                 mCallStateIcon.setVisibility(View.GONE);
             } else {
                 mCallStateIcon.setVisibility(View.VISIBLE);
@@ -532,7 +592,9 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
                 mCallStateIcon.clearAnimation();
             } else {
                 mCallStateLabel.startAnimation(mPulseAnimation);
-                mCallStateIcon.startAnimation(mPulseAnimation);
+                if (mCallStateIcon.getVisibility() == View.VISIBLE) {
+                    mCallStateIcon.startAnimation(mPulseAnimation);
+                }
             }
         } else {
             Animation callStateAnimation = mCallStateLabel.getAnimation();
@@ -701,6 +763,12 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
                 callStateLabel = disconnectCause.getLabel();
                 if (TextUtils.isEmpty(callStateLabel)) {
                     callStateLabel = context.getString(R.string.card_title_call_ended);
+                }
+                if (context.getResources().getBoolean(R.bool.def_incallui_clearcode_enabled)) {
+                    String clearText = disconnectCause.getDescription() == null ? "" : disconnectCause.getDescription().toString();
+                    if (!TextUtils.isEmpty(clearText)) {
+                        Toast.makeText(context, clearText, Toast.LENGTH_SHORT).show();
+                    }
                 }
                 break;
             case Call.State.CONFERENCED:
@@ -1012,4 +1080,169 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
             v.setBottom(oldBottom);
         }
     }
+
+    private OnClickListener mVBListener = new OnClickListener() {
+        @Override
+        public void onClick(View arg0) {
+            if (isVBAvailable()) {
+                switchVBStatus();
+            }
+
+            updateVBButton();
+            showVBNotify();
+        }
+    };
+
+    private boolean isVBAvailable() {
+        int mode = AudioModeProvider.getInstance().getAudioMode();
+        final Activity activity = getActivity();
+
+        int settingsTtyMode;
+
+        if (activity != null) {
+            settingsTtyMode = Settings.Secure.getInt(activity.getContentResolver(),
+                    Settings.Secure.PREFERRED_TTY_MODE, TTY_MODE_OFF);
+        } else {
+            settingsTtyMode = TTY_MODE_OFF;
+        }
+
+        return (mode == AudioState.ROUTE_EARPIECE || mode == AudioState.ROUTE_SPEAKER
+                || settingsTtyMode == TTY_MODE_HCO);
+    }
+
+    private void switchVBStatus() {
+        if (mAudioManager.getParameters(VOLUME_BOOST).contains("=on")) {
+            mAudioManager.setParameters(VOLUME_BOOST + "=off");
+        } else {
+            mAudioManager.setParameters(VOLUME_BOOST + "=on");
+        }
+    }
+
+    private void updateVBButton() {
+        if (isVBAvailable()
+                && mAudioManager.getParameters(VOLUME_BOOST).contains("=on")) {
+
+                mVBButton.setBackgroundResource(R.drawable.vb_active);
+        } else if (isVBAvailable()
+                && !(mAudioManager.getParameters(VOLUME_BOOST).contains("=on"))) {
+
+                mVBButton.setBackgroundResource(R.drawable.vb_normal);
+        } else {
+            mVBButton.setBackgroundResource(R.drawable.vb_disable);
+        }
+    }
+
+    private void showVBNotify() {
+        if (mVBNotify != null) {
+            mVBNotify.cancel();
+        }
+
+        if (isVBAvailable()
+                && mAudioManager.getParameters(VOLUME_BOOST).contains("=on")) {
+
+            mVBNotify = Toast.makeText(getView().getContext(),
+                    R.string.volume_boost_notify_enabled, Toast.LENGTH_SHORT);
+        } else if (isVBAvailable()
+                && !(mAudioManager.getParameters(VOLUME_BOOST).contains("=on"))) {
+
+            mVBNotify = Toast.makeText(getView().getContext(),
+                    R.string.volume_boost_notify_disabled, Toast.LENGTH_SHORT);
+        } else {
+            mVBNotify = Toast.makeText(getView().getContext(),
+                    R.string.volume_boost_notify_unavailable, Toast.LENGTH_SHORT);
+        }
+
+        mVBNotify.setGravity(Gravity.TOP, 0, mVBToastPosition);
+        mVBNotify.show();
+    }
+
+    private void updateVBbyCall(int state) {
+        updateVBButton();
+
+        if (Call.State.ACTIVE == state) {
+            mVBButton.setVisibility(View.VISIBLE);
+        } else if (Call.State.DISCONNECTED == state) {
+            if (!CallList.getInstance().hasAnyLiveCall()
+                    && mAudioManager.getParameters(VOLUME_BOOST).contains("=on")) {
+                mVBButton.setVisibility(View.INVISIBLE);
+
+                mAudioManager.setParameters(VOLUME_BOOST + "=off");
+            }
+        }
+    }
+
+    public void updateVBbyAudioMode(int newMode) {
+        if (!(newMode == AudioState.ROUTE_EARPIECE
+                || newMode == AudioState.ROUTE_BLUETOOTH
+                || newMode == AudioState.ROUTE_WIRED_HEADSET
+                || newMode == AudioState.ROUTE_SPEAKER)) {
+            return;
+        }
+
+        if (mAudioManager != null && mAudioManager.getParameters(VOLUME_BOOST).contains("=on")) {
+            mAudioManager.setParameters(VOLUME_BOOST + "=off");
+        }
+
+        updateVBButton();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        getActivity().unregisterReceiver(recorderStateReceiver);
+    }
+
+    private void showCallRecordingElapsedTime() {
+        if (mRecordingTimeLabel.getVisibility() != View.VISIBLE) {
+            AnimUtils.fadeIn(mRecordingTimeLabel, AnimUtils.DEFAULT_DURATION);
+        }
+
+        mRecordingTimeLabel.setText(mRecordingTime);
+    }
+
+    private BroadcastReceiver recorderStateReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (!RECORD_STATE_CHANGED.equals(intent.getAction())) {
+                return;
+            }
+
+            if (mInCallActivity.isCallRecording()) {
+                recorderHandler.sendEmptyMessage(MESSAGE_TIMER);
+            } else {
+                mRecordingTimeLabel.setVisibility(View.GONE);
+                mRecordingIcon.setVisibility(View.GONE);
+            }
+        }
+    };
+
+    private Handler recorderHandler = new Handler() {
+
+        @Override
+        public void handleMessage(Message msg) {
+
+            switch (msg.what) {
+            case MESSAGE_TIMER:
+                if (!mInCallActivity.isCallRecording()) {
+                    break;
+                }
+
+                String recordingTime = mInCallActivity.getCallRecordingTime();
+
+                if (!TextUtils.isEmpty(recordingTime)) {
+                    mRecordingTime = recordingTime;
+                    mRecordingTimeLabel.setVisibility(View.VISIBLE);
+                    showCallRecordingElapsedTime();
+                    mRecordingIcon.setVisibility(View.VISIBLE);
+                }
+
+                if (!recorderHandler.hasMessages(MESSAGE_TIMER)) {
+                    sendEmptyMessageDelayed(MESSAGE_TIMER, 1000);
+                }
+
+                break;
+            }
+        }
+    };
 }
