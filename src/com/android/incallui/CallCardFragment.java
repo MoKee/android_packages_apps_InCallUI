@@ -509,7 +509,7 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
         // set the name field.
         setPrimaryName(name, nameIsNumber);
 
-        if (MoKeeUtils.isChineseLanguage(false)) {
+        if (MoKeeUtils.isSupportLanguage(false)) {
             CharSequence locationLabel = PhoneLocation.getCityFromPhone(!nameIsNumber ? number : name);
             label = (TextUtils.isEmpty(label) ? locationLabel : label + "  " + locationLabel).toString().trim();
         }
