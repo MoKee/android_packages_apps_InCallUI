@@ -67,7 +67,7 @@ public class InCallVibrationHandler extends Handler implements
                 long durationMillis = System.currentTimeMillis() - mActiveCall.getConnectTimeMillis();
                 Log.d(this, "duration is " + durationMillis);
 
-                if (mPrefs.getBoolean(KEY_VIBRATE_OUTGOING, false) && durationMillis < 200) {
+                if (mPrefs.getBoolean(KEY_VIBRATE_OUTGOING, true) && durationMillis < 200) {
                     vibrate(100, 200, 0);
                 }
                 if (mPrefs.getBoolean(KEY_VIBRATE_45SECS, false)) {
@@ -76,7 +76,7 @@ public class InCallVibrationHandler extends Handler implements
             }
         } else if (mActiveCall != null && newState == InCallState.NO_CALLS) {
             long durationMillis = System.currentTimeMillis() - mActiveCall.getConnectTimeMillis();
-            if (mPrefs.getBoolean(KEY_VIBRATE_HANGUP, false) && durationMillis > 500) {
+            if (mPrefs.getBoolean(KEY_VIBRATE_HANGUP, true) && durationMillis > 500) {
                 vibrate(50, 100, 50);
             }
             // Stop 45-second vibration
