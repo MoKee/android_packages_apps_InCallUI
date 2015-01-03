@@ -18,7 +18,6 @@ package com.android.incallui;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.google.common.base.Preconditions;
 
 import android.os.Handler;
@@ -86,7 +85,9 @@ public class CallList implements InCallPhoneListener {
         @Override
         public void onCallAdded(Phone phone, android.telecom.Call telecommCall) {
             Call call = new Call(telecommCall);
-            if (call.getState() == Call.State.INCOMING) {
+            Log.d(this, "onCallAdded: callState=" + call.getState());
+            if (call.getState() == Call.State.INCOMING ||
+                    call.getState() == Call.State.CALL_WAITING) {
                 onIncoming(call, call.getCannedSmsResponses());
             } else {
                 onUpdate(call);
@@ -677,10 +678,13 @@ public class CallList implements InCallPhoneListener {
     public boolean hasAnyLiveCall(long subId) {
         for (Call call : mCallById.values()) {
             PhoneAccountHandle ph = call.getAccountHandle();
-            if (!isCallDead(call) && ph != null && (!ph.getId().equals("E"))
-                    && (Long.parseLong(ph.getId()) == subId)) {
-                Log.i(this, "hasAnyLiveCall sub = " + subId);
-                return true;
+            try {
+                if (!isCallDead(call) && ph != null && (Long.parseLong(ph.getId()) == subId)) {
+                    Log.i(this, "hasAnyLiveCall sub = " + subId);
+                    return true;
+                }
+            } catch (NumberFormatException e) {
+                Log.w(this,"Sub Id is not a number " + e);
             }
         }
         Log.i(this, "no active call ");

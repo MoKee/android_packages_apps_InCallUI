@@ -71,6 +71,8 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
     private final List<IncomingCallListener> mIncomingCallListeners = new CopyOnWriteArrayList<>();
     private final Set<InCallDetailsListener> mDetailsListeners = Collections.newSetFromMap(
             new ConcurrentHashMap<InCallDetailsListener, Boolean>(8, 0.9f, 1));
+    private final Set<CanAddCallListener> mCanAddCallListeners = Collections.newSetFromMap(
+            new ConcurrentHashMap<CanAddCallListener, Boolean>(8, 0.9f, 1));
     private final Set<InCallOrientationListener> mOrientationListeners = Collections.newSetFromMap(
             new ConcurrentHashMap<InCallOrientationListener, Boolean>(8, 0.9f, 1));
     private final Set<InCallEventListener> mInCallEventListeners = Collections.newSetFromMap(
@@ -102,6 +104,12 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
         @Override
         public void onCallRemoved(Phone phone, android.telecom.Call call) {
             call.removeListener(mCallListener);
+        }
+        @Override
+        public void onCanAddCallChanged(Phone phone, boolean canAddCall) {
+            for (CanAddCallListener listener : mCanAddCallListeners) {
+                listener.onCanAddCallChanged(canAddCall);
+            }
         }
     };
 
@@ -215,6 +223,8 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
         // will kick off an update and the whole process can start.
         mCallList.addListener(this);
 
+        VideoPauseController.getInstance().setUp(this);
+
         Log.d(this, "Finished InCallPresenter.setUp");
     }
 
@@ -230,6 +240,8 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
         Log.d(this, "tearDown");
         mServiceConnected = false;
         attemptCleanup();
+
+        VideoPauseController.getInstance().tearDown();
     }
 
     private void attemptFinishActivity() {
@@ -475,6 +487,17 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
         }
     }
 
+    public void addCanAddCallListener(CanAddCallListener listener) {
+        Preconditions.checkNotNull(listener);
+        mCanAddCallListeners.add(listener);
+    }
+
+    public void removeCanAddCallListener(CanAddCallListener listener) {
+        if (listener != null) {
+            mCanAddCallListeners.remove(listener);
+        }
+    }
+
     public void addOrientationListener(InCallOrientationListener listener) {
         Preconditions.checkNotNull(listener);
         mOrientationListeners.add(listener);
@@ -647,6 +670,7 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
         if(mInCallActivity!=null) {
             mIsChangingConfigurations = mInCallActivity.isChangingConfigurations();
         }
+        Log.d(this, "IsChangingConfigurations=" + mIsChangingConfigurations);
     }
 
 
@@ -679,9 +703,28 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
 
         if (showing) {
             mIsActivityPreviouslyStarted = true;
-            mIsChangingConfigurations = false;
         } else {
             updateIsChangingConfigurations();
+        }
+    }
+
+    /*package*/
+    void onActivityStarted() {
+        Log.d(this, "onActivityStarted");
+        notifyVideoPauseController(true);
+    }
+
+    /*package*/
+    void onActivityStopped() {
+        Log.d(this, "onActivityStopped");
+        notifyVideoPauseController(false);
+    }
+
+    private void notifyVideoPauseController(boolean showing) {
+        Log.d(this, "notifyVideoPauseController: mIsChangingConfigurations=" +
+                    mIsChangingConfigurations);
+        if (!mIsChangingConfigurations) {
+            VideoPauseController.getInstance().onUiShowing(showing);
         }
     }
 
@@ -840,6 +883,15 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
                 newState == InCallState.OUTGOING;
         boolean isAnyOtherSubActive = InCallState.INCOMING == newState &&
                 mCallList.isAnyOtherSubActive(mCallList.getActiveSubscription());
+
+        //If the call is auto answered bring up the InCallActivity
+        boolean isAutoAnswer = false;
+        isAutoAnswer = (mInCallState == InCallState.INCOMING) &&
+                           (newState == InCallState.INCALL) &&
+                           (mInCallActivity == null);
+
+        Log.d(this, "startOrFinishUi: " + isAutoAnswer);
+
         if ((newState == mInCallState && !(mInCallActivity == null && isAnyOtherSubActive))
                 || alreadyOutgoing) {
             return newState;
@@ -903,7 +955,7 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
             return mInCallState;
         }
 
-        if (showCallUi || showAccountPicker) {
+        if (showCallUi || showAccountPicker || isAutoAnswer) {
             Log.i(this, "Start in call UI");
             showInCall(false /* showDialpad */, !showAccountPicker /* newOutgoingCall */);
         } else if (startStartupSequence) {
@@ -1156,6 +1208,11 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
      *      and landscape.  {@Code False} if the in-call UI should be locked in portrait.
      */
     public void setInCallAllowsOrientationChange(boolean allowOrientationChange) {
+        if (mInCallActivity == null) {
+            Log.e(this, "InCallActivity is null. Can't set requested orientation.");
+            return;
+        }
+
         if (!allowOrientationChange) {
             mInCallActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
         } else {
@@ -1242,6 +1299,10 @@ public class InCallPresenter implements CallList.Listener, InCallPhoneListener {
 
     public interface IncomingCallListener {
         public void onIncomingCall(InCallState oldState, InCallState newState, Call call);
+    }
+
+    public interface CanAddCallListener {
+        public void onCanAddCallChanged(boolean canAddCall);
     }
 
     public interface InCallDetailsListener {

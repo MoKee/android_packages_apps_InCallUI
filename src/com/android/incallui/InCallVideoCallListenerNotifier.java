@@ -167,6 +167,17 @@ public class InCallVideoCallListenerNotifier {
     }
 
     /**
+     * Inform listeners of a call session event.
+     *
+     * @param event The call session event.
+     */
+    public void callSessionEvent(int event) {
+        for (VideoEventListener listener : mVideoEventListeners) {
+            listener.onCallSessionEvent(event);
+        }
+    }
+
+    /**
      * Inform listeners of a downgrade to audio.
      *
      * @param call The call.
@@ -213,6 +224,17 @@ public class InCallVideoCallListenerNotifier {
     public void cameraDimensionsChanged(Call call, int width, int height) {
         for (SurfaceChangeListener listener : mSurfaceChangeListeners) {
             listener.onCameraDimensionsChange(call, width, height);
+        }
+    }
+
+    /**
+     * Inform listeners of a change to call data usage.
+     *
+     * @param dataUsage data usage value
+     */
+    public void callDataUsageChanged(long dataUsage) {
+        for (VideoEventListener listener : mVideoEventListeners) {
+            listener.onCallDataUsageChange(dataUsage);
         }
     }
 
@@ -275,6 +297,20 @@ public class InCallVideoCallListenerNotifier {
          */
         public void onVideoQualityChanged(Call call, int videoCallQuality);
 
+        /*
+         * Called when call data usage value is requested or when call data usage value is updated
+         * because of a call state change
+         *
+         * @param dataUsage call data usage value
+         */
+        public void onCallDataUsageChange(long dataUsage);
+
+        /**
+         * Called when call session event is raised.
+         *
+         * @param event The call session event.
+         */
+        public void onCallSessionEvent(int event);
     }
 
     /**
