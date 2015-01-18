@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2013 The Android Open Source Project
+ * Copyright (C) 2015 The MoKee OpenSource Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +25,8 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.mokee.location.PhoneLocation;
+import android.mokee.utils.MoKeeUtils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.telecom.DisconnectCause;
@@ -719,10 +722,18 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
     private static String getNumberForCall(ContactCacheEntry contactInfo) {
         // If the name is empty, we use the number for the name...so dont show a second
         // number in the number field
-        if (TextUtils.isEmpty(contactInfo.name)) {
-            return contactInfo.location;
+        if (MoKeeUtils.isSupportLanguage(true)) {
+            CharSequence location = PhoneLocation.getCityFromPhone(contactInfo.number);
+            if (TextUtils.isEmpty(contactInfo.name)) {
+                return String.valueOf(location);
+            }
+            return !TextUtils.isEmpty(location) ? location + " " + contactInfo.number : contactInfo.number;
+        } else {
+            if (TextUtils.isEmpty(contactInfo.name)) {
+                return contactInfo.location;
+            }
+            return contactInfo.number;
         }
-        return contactInfo.number;
     }
 
     public void secondaryInfoClicked() {
