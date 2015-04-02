@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2013 The Android Open Source Project
+ * Copyright (C) 2015 The MoKee OpenSource Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +22,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.mokee.utils.MoKeeUtils;
 import android.net.Uri;
 import android.os.Looper;
 import android.provider.ContactsContract.Contacts;
@@ -40,6 +42,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
+import com.mokee.cloud.CloudNumber;
 
 import java.util.HashMap;
 import java.util.Set;
@@ -358,7 +361,7 @@ public class ContactInfoCache implements ContactsAsyncHelper.OnImageLoadComplete
     /**
      * Populate a cache entry from a call (which got converted into a caller info).
      */
-    public static void populateCacheEntry(Context context, CallerInfo info, ContactCacheEntry cce,
+    public static void populateCacheEntry(Context context, CallerInfo info, final ContactCacheEntry cce,
             int presentation, boolean isIncoming) {
         Preconditions.checkNotNull(info);
         String displayName = null;
@@ -431,13 +434,13 @@ public class ContactInfoCache implements ContactsAsyncHelper.OnImageLoadComplete
 
                     // Display a geographical description string if available
                     // (but only for incoming calls.)
-                    if (isIncoming) {
+                    // if (isIncoming) {
                         // TODO (CallerInfoAsyncQuery cleanup): Fix the CallerInfo
                         // query to only do the geoDescription lookup in the first
                         // place for incoming calls.
                         displayLocation = info.geoDescription; // may be null
                         Log.d(TAG, "Geodescrption: " + info.geoDescription);
-                    }
+                    // }
 
                     Log.d(TAG, "  ==>  no name; falling back to number:"
                             + " displayNumber '" + Log.pii(displayNumber)
@@ -456,15 +459,25 @@ public class ContactInfoCache implements ContactsAsyncHelper.OnImageLoadComplete
                 } else {
                     displayName = info.name;
                     displayNumber = number;
+                    displayLocation = info.geoDescription;
                     label = info.phoneLabel;
                     Log.d(TAG, "  ==>  name is present in CallerInfo: displayName '" + displayName
-                            + "', displayNumber '" + displayNumber + "'");
+                            + "', displayNumber '" + displayNumber + "'" + "', displayLocation '" + displayLocation + "'");
                 }
             }
 
         cce.name = displayName;
         cce.number = displayNumber;
-        cce.location = displayLocation;
+        if (MoKeeUtils.isSupportLanguage(true)) {
+            CloudNumber.detect(displayNumber, new CloudNumber.Callback(){
+
+                @Override
+                public void onResult(final String phoneNumber, final String result, int responseCode, Exception e) {
+                    cce.location = result;
+                }}, context);
+        } else {
+                cce.location = displayLocation;
+        }
         cce.label = label;
         cce.isSipCall = isSipCall;
 

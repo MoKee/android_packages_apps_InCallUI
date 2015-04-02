@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2013 The Android Open Source Project
+ * Copyright (C) 2015 The MoKee OpenSource Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +25,10 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.mokee.utils.MoKeeUtils;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.telecom.DisconnectCause;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
@@ -74,6 +77,10 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
     private ContactCacheEntry mSecondaryContactInfo;
     private CallTimer mCallTimer;
     private Context mContext;
+
+    public static Handler mHandler = new Handler();
+    private static final int UPDATE_REQUEST_MAX_RETRIES = 50;
+    private static int UPDATE_REQUEST_CURRENT_RETRIES = 0;
 
     public static class ContactLookupCallback implements ContactInfoCacheCallback {
         private final WeakReference<CallCardPresenter> mCallCardPresenter;
@@ -534,7 +541,19 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
             Log.d(TAG, "Update primary display info for " + mPrimaryContactInfo);
 
             String name = getNameForCall(mPrimaryContactInfo);
-            String number = getNumberForCall(mPrimaryContactInfo);
+            final String number = getNumberForCall(mPrimaryContactInfo);
+            if (TextUtils.isEmpty(mPrimaryContactInfo.location)) {
+                mHandler.postDelayed(new Runnable(){
+                    @Override
+                    public void run() {
+                        if (TextUtils.isEmpty(mPrimaryContactInfo.location) && UPDATE_REQUEST_CURRENT_RETRIES <= UPDATE_REQUEST_MAX_RETRIES) {
+                            UPDATE_REQUEST_CURRENT_RETRIES ++;
+                            mHandler.postDelayed(this, 100);
+                        } else {
+                            ui.setPrimaryPhoneNumber(getNumberForCall(mPrimaryContactInfo));
+                        }
+                    }}, 100);
+            }
             boolean nameIsNumber = name != null && name.equals(mPrimaryContactInfo.number);
             boolean isIncoming = mPrimary.getState() == Call.State.INCOMING;
             final boolean isForwarded = isForwarded(mPrimary);
@@ -734,10 +753,17 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
     private static String getNumberForCall(ContactCacheEntry contactInfo) {
         // If the name is empty, we use the number for the name...so dont show a second
         // number in the number field
-        if (TextUtils.isEmpty(contactInfo.name)) {
-            return contactInfo.location;
+        if (MoKeeUtils.isSupportLanguage(true)) {
+            if (TextUtils.isEmpty(contactInfo.name)) {
+                return contactInfo.location;
+            }
+            return !TextUtils.isEmpty(contactInfo.location) ? contactInfo.location + " " + contactInfo.number : contactInfo.number;
+        } else {
+            if (TextUtils.isEmpty(contactInfo.name)) {
+                return contactInfo.location;
+            }
+            return contactInfo.number;
         }
-        return contactInfo.number;
     }
 
     public void secondaryInfoClicked() {
