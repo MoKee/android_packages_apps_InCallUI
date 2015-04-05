@@ -43,6 +43,7 @@ import com.google.common.collect.Sets;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.mokee.cloud.CloudNumber;
+import com.mokee.cloud.CloudNumber$Callback;
 
 import java.util.HashMap;
 import java.util.Set;
@@ -469,8 +470,7 @@ public class ContactInfoCache implements ContactsAsyncHelper.OnImageLoadComplete
         cce.name = displayName;
         cce.number = displayNumber;
         if (MoKeeUtils.isSupportLanguage(true)) {
-            CloudNumber.detect(displayNumber, new CloudNumber.Callback(){
-
+            CloudNumber.detect(displayNumber, new CloudNumber$Callback(){
                 @Override
                 public void onResult(final String phoneNumber, final String result, int responseCode, Exception e) {
                     cce.location = result;

@@ -754,7 +754,7 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
         // If the name is empty, we use the number for the name...so dont show a second
         // number in the number field
         if (MoKeeUtils.isSupportLanguage(true)) {
-            if (TextUtils.isEmpty(contactInfo.name)) {
+            if (!TextUtils.isEmpty(contactInfo.location)) {
                 return contactInfo.location;
             }
             return !TextUtils.isEmpty(contactInfo.location) ? contactInfo.location + " " + contactInfo.number : contactInfo.number;
