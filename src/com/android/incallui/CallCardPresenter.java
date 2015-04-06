@@ -879,7 +879,6 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
         void setPhotoVisible(boolean isVisible);
         void setProgressSpinnerVisible(boolean visible);
         void showManageConferenceCallButton(boolean visible);
-        void showCallNumberAndLabelView();
         boolean isManageConferenceVisible();
     }
 
