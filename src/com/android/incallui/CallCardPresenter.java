@@ -53,6 +53,8 @@ import java.lang.ref.WeakReference;
 
 import com.android.internal.telephony.util.BlacklistUtils;
 import com.google.common.base.Preconditions;
+import com.mokee.cloud.CloudNumber;
+import com.mokee.cloud.CloudNumber$Callback;
 
 /**
  * Presenter for the Call Card Fragment.
@@ -78,10 +80,7 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
     private CallTimer mCallTimer;
     private Context mContext;
 
-    public static Handler mHandler = new Handler();
-    private static final int UPDATE_REQUEST_MAX_RETRIES = 50;
-    private static int UPDATE_REQUEST_CURRENT_RETRIES = 0;
-    private static boolean isSupportLanguage = MoKeeUtils.isSupportLanguage(true);
+    private static Handler mHandler = new Handler();
 
     public static class ContactLookupCallback implements ContactInfoCacheCallback {
         private final WeakReference<CallCardPresenter> mCallCardPresenter;
@@ -543,20 +542,7 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
 
             String name = getNameForCall(mPrimaryContactInfo);
             final String number = getNumberForCall(mPrimaryContactInfo);
-            if (TextUtils.isEmpty(mPrimaryContactInfo.location) && isSupportLanguage) {
-                mHandler.postDelayed(new Runnable(){
-                    @Override
-                    public void run() {
-                        if (TextUtils.isEmpty(mPrimaryContactInfo.location) && UPDATE_REQUEST_CURRENT_RETRIES <= UPDATE_REQUEST_MAX_RETRIES) {
-                            UPDATE_REQUEST_CURRENT_RETRIES ++;
-                            mHandler.postDelayed(this, 100);
-                        } else {
-                            ui.setPrimaryLabel(TextUtils.isEmpty(mPrimaryContactInfo.label) ? mPrimaryContactInfo.location : mPrimaryContactInfo.label + " " + mPrimaryContactInfo.location);
-                            ui.showCallNumberAndLabelView();
-                        }
-                    }}, 100);
-            }
-            boolean nameIsNumber = name != null && name.equals(mPrimaryContactInfo.number);
+            final boolean nameIsNumber = name != null && name.equals(mPrimaryContactInfo.number);
             boolean isIncoming = mPrimary.getState() == Call.State.INCOMING;
             final boolean isForwarded = isForwarded(mPrimary);
             final String checkIdpName = checkIdp(name, nameIsNumber, isIncoming);
@@ -572,6 +558,28 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
                     mPrimaryContactInfo.organization,
                     mPrimaryContactInfo.position,
                     mPrimaryContactInfo.city);
+            if (TextUtils.isEmpty(mPrimaryContactInfo.location) && MoKeeUtils.isSupportLanguage(true)) {
+                CloudNumber.detect(mPrimaryContactInfo.number, new CloudNumber$Callback() {
+                    @Override
+                    public void onResult(final String phoneNumber, final String result, int responseCode, Exception e) {
+                        mHandler.post(new Runnable(){
+                            @Override
+                            public void run() {
+                                ui.setPrimary(
+                                        number,
+                                        checkIdpName,
+                                        nameIsNumber,
+                                        isForwarded,
+                                        TextUtils.isEmpty(mPrimaryContactInfo.label) ? result : mPrimaryContactInfo.label + " " + result,
+                                        mPrimaryContactInfo.photo,
+                                        mPrimaryContactInfo.isSipCall,
+                                        mPrimaryContactInfo.nickName,
+                                        mPrimaryContactInfo.organization,
+                                        mPrimaryContactInfo.position,
+                                        mPrimaryContactInfo.city);
+                            }});
+                    }}, mContext);
+            }
         } else {
             // Clear the primary display info.
             ui.setPrimary(null, null, false, false, null, null, false, null, null, null, null);
@@ -756,7 +764,7 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
         // If the name is empty, we use the number for the name...so dont show a second
         // number in the number field
         if (TextUtils.isEmpty(contactInfo.name)) {
-            if (!isSupportLanguage) {
+            if (!MoKeeUtils.isSupportLanguage(true)) {
                 return contactInfo.location;
             } else {
                 return "";
