@@ -470,7 +470,6 @@ public class ContactInfoCache implements ContactsAsyncHelper.OnImageLoadComplete
         cce.name = displayName;
         cce.number = displayNumber;
         if (MoKeeUtils.isSupportLanguage(true)) {
-            Log.i("MOKEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", "populateCacheEntry");
             CloudNumber.detect(displayNumber, new CloudNumber$Callback() {
                 @Override
                 public void onResult(final String phoneNumber, final String result, int responseCode, Exception e) {
