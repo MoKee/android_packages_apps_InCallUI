@@ -519,6 +519,12 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
     }
 
     @Override
+    public void showCallNumberAndLabelView() {
+        mCallNumberAndLabel.setVisibility(View.VISIBLE);
+        mElapsedTime.setTextAlignment(View.TEXT_ALIGNMENT_VIEW_END);
+    }
+
+    @Override
     public void setPrimaryPhoneNumber(String number) {
         // Set the number
         if (TextUtils.isEmpty(number)) {

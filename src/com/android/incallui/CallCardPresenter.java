@@ -81,6 +81,7 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
     public static Handler mHandler = new Handler();
     private static final int UPDATE_REQUEST_MAX_RETRIES = 50;
     private static int UPDATE_REQUEST_CURRENT_RETRIES = 0;
+    private static boolean isSupportLanguage = MoKeeUtils.isSupportLanguage(true);
 
     public static class ContactLookupCallback implements ContactInfoCacheCallback {
         private final WeakReference<CallCardPresenter> mCallCardPresenter;
@@ -542,7 +543,7 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
 
             String name = getNameForCall(mPrimaryContactInfo);
             final String number = getNumberForCall(mPrimaryContactInfo);
-            if (TextUtils.isEmpty(mPrimaryContactInfo.location)) {
+            if (TextUtils.isEmpty(mPrimaryContactInfo.location) && isSupportLanguage) {
                 mHandler.postDelayed(new Runnable(){
                     @Override
                     public void run() {
@@ -550,7 +551,8 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
                             UPDATE_REQUEST_CURRENT_RETRIES ++;
                             mHandler.postDelayed(this, 100);
                         } else {
-                            ui.setPrimaryPhoneNumber(getNumberForCall(mPrimaryContactInfo));
+                            ui.setPrimaryLabel(TextUtils.isEmpty(mPrimaryContactInfo.label) ? mPrimaryContactInfo.location : mPrimaryContactInfo.label + " " + mPrimaryContactInfo.location);
+                            ui.showCallNumberAndLabelView();
                         }
                     }}, 100);
             }
@@ -753,17 +755,14 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
     private static String getNumberForCall(ContactCacheEntry contactInfo) {
         // If the name is empty, we use the number for the name...so dont show a second
         // number in the number field
-        if (MoKeeUtils.isSupportLanguage(true)) {
-            if (!TextUtils.isEmpty(contactInfo.location)) {
+        if (TextUtils.isEmpty(contactInfo.name)) {
+            if (!isSupportLanguage) {
                 return contactInfo.location;
+            } else {
+                return "";
             }
-            return !TextUtils.isEmpty(contactInfo.location) ? contactInfo.location + " " + contactInfo.number : contactInfo.number;
-        } else {
-            if (TextUtils.isEmpty(contactInfo.name)) {
-                return contactInfo.location;
-            }
-            return contactInfo.number;
         }
+        return contactInfo.number;
     }
 
     public void secondaryInfoClicked() {
@@ -872,6 +871,7 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
         void setPhotoVisible(boolean isVisible);
         void setProgressSpinnerVisible(boolean visible);
         void showManageConferenceCallButton(boolean visible);
+        void showCallNumberAndLabelView();
         boolean isManageConferenceVisible();
     }
 
