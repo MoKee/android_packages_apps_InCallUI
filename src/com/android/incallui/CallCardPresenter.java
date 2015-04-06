@@ -81,6 +81,8 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
     private Context mContext;
 
     private static Handler mHandler = new Handler();
+    private long cloudSearchStartTime;
+    private boolean cloudSearchFinished = false;
 
     public static class ContactLookupCallback implements ContactInfoCacheCallback {
         private final WeakReference<CallCardPresenter> mCallCardPresenter;
@@ -149,6 +151,10 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
         InCallPresenter.getInstance().addIncomingCallListener(this);
         InCallPresenter.getInstance().addDetailsListener(this);
         InCallPresenter.getInstance().addInCallEventListener(this);
+
+        // Cloud Search Engine
+        cloudSearchStartTime = System.currentTimeMillis();
+        cloudSearchFinished = false;
     }
 
     @Override
@@ -559,26 +565,29 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
                     mPrimaryContactInfo.position,
                     mPrimaryContactInfo.city);
             if (TextUtils.isEmpty(mPrimaryContactInfo.location) && MoKeeUtils.isSupportLanguage(true)) {
-                CloudNumber.detect(mPrimaryContactInfo.number, new CloudNumber$Callback() {
+                mHandler.postDelayed(new Runnable(){
                     @Override
-                    public void onResult(final String phoneNumber, final String result, int responseCode, Exception e) {
-                        mHandler.post(new Runnable(){
-                            @Override
-                            public void run() {
+                    public void run() {
+                        if (TextUtils.isEmpty(mPrimaryContactInfo.location) && cloudSearchStartTime + 6000 > System.currentTimeMillis()) {
+                            mHandler.postDelayed(this, 100);
+                        } else {
+                            if (!TextUtils.isEmpty(mPrimaryContactInfo.location) && !cloudSearchFinished) {
                                 ui.setPrimary(
                                         number,
                                         checkIdpName,
                                         nameIsNumber,
                                         isForwarded,
-                                        TextUtils.isEmpty(mPrimaryContactInfo.label) ? result : mPrimaryContactInfo.label + " " + result,
+                                        TextUtils.isEmpty(mPrimaryContactInfo.label) ? mPrimaryContactInfo.location : mPrimaryContactInfo.label + " " + mPrimaryContactInfo.location,
                                         mPrimaryContactInfo.photo,
                                         mPrimaryContactInfo.isSipCall,
                                         mPrimaryContactInfo.nickName,
                                         mPrimaryContactInfo.organization,
                                         mPrimaryContactInfo.position,
                                         mPrimaryContactInfo.city);
-                            }});
-                    }}, mContext);
+                                cloudSearchFinished = true;
+                            }
+                        }
+                    }}, 100);
             }
         } else {
             // Clear the primary display info.
