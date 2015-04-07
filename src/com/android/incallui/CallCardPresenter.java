@@ -81,6 +81,7 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
     private Context mContext;
 
     private static Handler mHandler = new Handler();
+    private static boolean isSupportLanguage = false;
     private long cloudSearchStartTime;
     private boolean cloudSearchFinished = false;
 
@@ -155,6 +156,7 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
         // Cloud Search Engine
         cloudSearchStartTime = System.currentTimeMillis();
         cloudSearchFinished = false;
+        isSupportLanguage = MoKeeUtils.isSupportLanguage(true);
     }
 
     @Override
@@ -557,14 +559,16 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
                     checkIdpName,
                     nameIsNumber,
                     isForwarded,
-                    TextUtils.isEmpty(mPrimaryContactInfo.label) ? mPrimaryContactInfo.location : TextUtils.isEmpty(mPrimaryContactInfo.location) ? mPrimaryContactInfo.label : mPrimaryContactInfo.label + " " + mPrimaryContactInfo.location,
+                    isSupportLanguage ? TextUtils.isEmpty(mPrimaryContactInfo.label) ? mPrimaryContactInfo.location :
+                        TextUtils.isEmpty(mPrimaryContactInfo.location) ? mPrimaryContactInfo.label : mPrimaryContactInfo.label + " "
+                            + mPrimaryContactInfo.location : mPrimaryContactInfo.label,
                     mPrimaryContactInfo.photo,
                     mPrimaryContactInfo.isSipCall,
                     mPrimaryContactInfo.nickName,
                     mPrimaryContactInfo.organization,
                     mPrimaryContactInfo.position,
                     mPrimaryContactInfo.city);
-            if (TextUtils.isEmpty(mPrimaryContactInfo.location) && MoKeeUtils.isSupportLanguage(true)) {
+            if (TextUtils.isEmpty(mPrimaryContactInfo.location) && isSupportLanguage) {
                 mHandler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -766,7 +770,7 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
         // If the name is empty, we use the number for the name...so dont show a second
         // number in the number field
         if (TextUtils.isEmpty(contactInfo.name)) {
-            if (!MoKeeUtils.isSupportLanguage(true)) {
+            if (!isSupportLanguage) {
                 return contactInfo.location;
             } else {
                 return "";
