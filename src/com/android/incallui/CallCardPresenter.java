@@ -548,7 +548,7 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
 
             String name = getNameForCall(mPrimaryContactInfo);
             final String number = getNumberForCall(mPrimaryContactInfo);
-            final boolean nameIsNumber = name != null && name.equals(mPrimaryContactInfo.number);
+            boolean nameIsNumber = name != null && name.equals(mPrimaryContactInfo.number);
             boolean isIncoming = mPrimary.getState() == Call.State.INCOMING;
             final boolean isForwarded = isForwarded(mPrimary);
             final String checkIdpName = checkIdp(name, nameIsNumber, isIncoming);
@@ -557,7 +557,7 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
                     checkIdpName,
                     nameIsNumber,
                     isForwarded,
-                    mPrimaryContactInfo.label,
+                    TextUtils.isEmpty(mPrimaryContactInfo.label) ? mPrimaryContactInfo.location : TextUtils.isEmpty(mPrimaryContactInfo.location) ? mPrimaryContactInfo.label : mPrimaryContactInfo.label + " " + mPrimaryContactInfo.location,
                     mPrimaryContactInfo.photo,
                     mPrimaryContactInfo.isSipCall,
                     mPrimaryContactInfo.nickName,
@@ -565,25 +565,18 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
                     mPrimaryContactInfo.position,
                     mPrimaryContactInfo.city);
             if (TextUtils.isEmpty(mPrimaryContactInfo.location) && MoKeeUtils.isSupportLanguage(true)) {
-                mHandler.postDelayed(new Runnable(){
+                mHandler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         if (TextUtils.isEmpty(mPrimaryContactInfo.location) && cloudSearchStartTime + 6000 > System.currentTimeMillis()) {
                             mHandler.postDelayed(this, 100);
                         } else {
                             if (!TextUtils.isEmpty(mPrimaryContactInfo.location) && !cloudSearchFinished) {
-                                ui.setPrimary(
-                                        number,
-                                        checkIdpName,
-                                        nameIsNumber,
-                                        isForwarded,
-                                        TextUtils.isEmpty(mPrimaryContactInfo.label) ? mPrimaryContactInfo.location : mPrimaryContactInfo.label + " " + mPrimaryContactInfo.location,
-                                        mPrimaryContactInfo.photo,
-                                        mPrimaryContactInfo.isSipCall,
-                                        mPrimaryContactInfo.nickName,
-                                        mPrimaryContactInfo.organization,
-                                        mPrimaryContactInfo.position,
-                                        mPrimaryContactInfo.city);
+                                String number = getNumberForCall(mPrimaryContactInfo);
+                                String label = TextUtils.isEmpty(mPrimaryContactInfo.label) ? mPrimaryContactInfo.location : mPrimaryContactInfo.label + " " + mPrimaryContactInfo.location;
+                                ui.setCallNumberAndLabelView(number, label);
+                                ui.setPrimaryPhoneNumber(number);
+                                ui.setPrimaryLabel(label);
                                 cloudSearchFinished = true;
                             }
                         }
@@ -889,6 +882,7 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
         void setProgressSpinnerVisible(boolean visible);
         void showManageConferenceCallButton(boolean visible);
         boolean isManageConferenceVisible();
+        void setCallNumberAndLabelView(String number, String label);
     }
 
     public int getActiveSubscription() {

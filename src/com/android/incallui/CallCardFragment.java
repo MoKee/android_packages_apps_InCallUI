@@ -543,6 +543,17 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
     }
 
     @Override
+    public void setCallNumberAndLabelView(String number, String label) {
+        if (TextUtils.isEmpty(number) && TextUtils.isEmpty(label)) {
+            mCallNumberAndLabel.setVisibility(View.GONE);
+            mElapsedTime.setTextAlignment(View.TEXT_ALIGNMENT_VIEW_START);
+        } else {
+            mCallNumberAndLabel.setVisibility(View.VISIBLE);
+            mElapsedTime.setTextAlignment(View.TEXT_ALIGNMENT_VIEW_END);
+        }
+    }
+
+    @Override
     public void setPrimary(String number, String name, boolean nameIsNumber, boolean isForwarded,
             String label, Drawable photo, boolean isSipCall,
             String nickName, String organization, String position, String city) {
