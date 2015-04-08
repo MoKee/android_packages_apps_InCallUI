@@ -572,6 +572,7 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
                 mHandler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
+                        if (mPrimaryContactInfo == null) return;
                         if (TextUtils.isEmpty(mPrimaryContactInfo.location) && cloudSearchStartTime + 6000 > System.currentTimeMillis()) {
                             mHandler.postDelayed(this, 100);
                         } else {
