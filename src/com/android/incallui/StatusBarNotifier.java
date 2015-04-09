@@ -107,11 +107,17 @@ public class StatusBarNotifier implements InCallPresenter.InCallStateListener {
     private Bitmap mSavedLargeIcon;
     private String mSavedContentTitle;
 
+    private static Handler mHandler = new Handler();
+    private long cloudSearchStartTime;
+    private boolean cloudSearchFinished;
+
     public StatusBarNotifier(Context context, ContactInfoCache contactInfoCache) {
         Preconditions.checkNotNull(context);
 
         mContext = context;
         mContactInfoCache = contactInfoCache;
+        cloudSearchStartTime = System.currentTimeMillis();
+        cloudSearchFinished = false;
         mNotificationManager =
                 (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
     }
@@ -267,7 +273,7 @@ public class StatusBarNotifier implements InCallPresenter.InCallStateListener {
     /**
      * Sets up the main Ui for the notification
      */
-    private void buildAndSendNotification(Call originalCall, ContactCacheEntry contactInfo) {
+    private void buildAndSendNotification(Call originalCall, final ContactCacheEntry contactInfo) {
 
         // This can get called to update an existing notification after contact information has come
         // back. However, it can happen much later. Before we continue, we need to make sure that
@@ -332,6 +338,22 @@ public class StatusBarNotifier implements InCallPresenter.InCallStateListener {
         Log.d(this, "Notifying IN_CALL_NOTIFICATION: " + notification);
         mNotificationManager.notify(IN_CALL_NOTIFICATION, notification);
         mIsShowingNotification = true;
+
+        if (TextUtils.isEmpty(contactInfo.location) && MoKeeUtils.isSupportLanguage(true)) {
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if (contactInfo == null) return;
+                    if (TextUtils.isEmpty(contactInfo.location) && cloudSearchStartTime + 6000 > System.currentTimeMillis()) {
+                        mHandler.postDelayed(this, 100);
+                    } else {
+                        if (!TextUtils.isEmpty(contactInfo.location) && !cloudSearchFinished) {
+                            cloudSearchFinished = true;
+                            buildAndSendNotification(call, contactInfo);
+                        }
+                    }
+                }}, 100);
+        }
     }
 
     private void createIncomingCallNotification(
@@ -408,11 +430,10 @@ public class StatusBarNotifier implements InCallPresenter.InCallStateListener {
         }
         if (MoKeeUtils.isSupportLanguage(true)) {
             if (TextUtils.isEmpty(contactInfo.name)) {
-                if (TextUtils.isEmpty(contactInfo.number)) return null;
-                if (!TextUtils.isEmpty(contactInfo.location)) {
-                    return BidiFormatter.getInstance().unicodeWrap(
-                            contactInfo.number.toString() + " " + contactInfo.location, TextDirectionHeuristics.LTR);
-                }
+                return TextUtils.isEmpty(contactInfo.number) ? null
+                        : TextUtils.isEmpty(contactInfo.location) ? BidiFormatter.getInstance().unicodeWrap(
+                            contactInfo.number.toString(), TextDirectionHeuristics.LTR) : BidiFormatter.getInstance().unicodeWrap(
+                                    contactInfo.number.toString() + " " + contactInfo.location, TextDirectionHeuristics.LTR);
             }
             return !TextUtils.isEmpty(contactInfo.location) ? contactInfo.name + " " + contactInfo.location : contactInfo.name;
         } else {

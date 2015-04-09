@@ -81,9 +81,9 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
     private Context mContext;
 
     private static Handler mHandler = new Handler();
-    private static boolean isSupportLanguage = false;
+    private static boolean isSupportLanguage;
     private long cloudSearchStartTime;
-    private boolean cloudSearchFinished = false;
+    private boolean cloudSearchFinished;
 
     public static class ContactLookupCallback implements ContactInfoCacheCallback {
         private final WeakReference<CallCardPresenter> mCallCardPresenter;
@@ -577,12 +577,12 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi>
                             mHandler.postDelayed(this, 100);
                         } else {
                             if (!TextUtils.isEmpty(mPrimaryContactInfo.location) && !cloudSearchFinished) {
+                                cloudSearchFinished = true;
                                 String number = getNumberForCall(mPrimaryContactInfo);
                                 String label = TextUtils.isEmpty(mPrimaryContactInfo.label) ? mPrimaryContactInfo.location : mPrimaryContactInfo.label + " " + mPrimaryContactInfo.location;
                                 ui.setCallNumberAndLabelView(number, label);
                                 ui.setPrimaryPhoneNumber(number);
                                 ui.setPrimaryLabel(label);
-                                cloudSearchFinished = true;
                             }
                         }
                     }}, 100);
