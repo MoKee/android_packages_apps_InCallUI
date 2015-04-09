@@ -362,7 +362,7 @@ public class ContactInfoCache implements ContactsAsyncHelper.OnImageLoadComplete
     /**
      * Populate a cache entry from a call (which got converted into a caller info).
      */
-    public static void populateCacheEntry(Context context, CallerInfo info, final ContactCacheEntry cce,
+    public static void populateCacheEntry(Context context, final CallerInfo info, final ContactCacheEntry cce,
             int presentation, boolean isIncoming) {
         Preconditions.checkNotNull(info);
         String displayName = null;
@@ -474,6 +474,7 @@ public class ContactInfoCache implements ContactsAsyncHelper.OnImageLoadComplete
                 @Override
                 public void onResult(final String phoneNumber, final String result, int responseCode, Exception e) {
                     cce.location = result;
+                    info.geoDescription = result;
                 }}, context);
         } else {
                 cce.location = displayLocation;
