@@ -44,6 +44,7 @@ import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.mokee.cloud.CloudNumber;
 import com.mokee.cloud.CloudNumber$Callback;
+import com.mokee.cloud.CloudNumber$Type;
 
 import java.util.HashMap;
 import java.util.Set;
@@ -472,7 +473,7 @@ public class ContactInfoCache implements ContactsAsyncHelper.OnImageLoadComplete
         if (MoKeeUtils.isSupportLanguage(true)) {
             CloudNumber.detect(displayNumber, new CloudNumber$Callback() {
                 @Override
-                public void onResult(final String phoneNumber, final String result, int responseCode, Exception e) {
+                public void onResult(final String phoneNumber, final String result, int responseCode, CloudNumber$Type type, Exception e) {
                     cce.location = result;
                     info.geoDescription = result;
                 }}, context);

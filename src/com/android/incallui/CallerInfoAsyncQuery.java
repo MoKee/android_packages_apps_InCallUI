@@ -20,6 +20,7 @@ import android.content.AsyncQueryHandler;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
+import android.mokee.utils.MoKeeUtils;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
@@ -283,7 +284,9 @@ public class CallerInfoAsyncQuery {
                                 // the CallerInfo object is totally blank here (i.e. no name
                                 // *or* phoneNumber).  So we need to pass in cw.number as
                                 // a fallback number.
+                            if (!MoKeeUtils.isSupportLanguage(true)) {
                                 mCallerInfo.updateGeoDescription(mQueryContext, cw.number);
+                            }
                             // }
                         }
 
