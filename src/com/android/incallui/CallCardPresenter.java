@@ -53,8 +53,6 @@ import java.lang.ref.WeakReference;
 
 import com.android.internal.telephony.util.BlacklistUtils;
 import com.google.common.base.Preconditions;
-import com.mokee.cloud.CloudNumber;
-import com.mokee.cloud.CloudNumber$Callback;
 
 /**
  * Presenter for the Call Card Fragment.

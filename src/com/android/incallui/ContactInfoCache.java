@@ -35,6 +35,7 @@ import android.telecom.TelecomManager;
 import android.text.TextUtils;
 
 import com.android.contacts.common.util.PhoneNumberHelper;
+import com.android.dialer.DialerApplication;
 import com.android.incallui.service.PhoneNumberService;
 import com.android.incalluibind.ServiceFactory;
 import com.android.services.telephony.common.MoreStrings;
@@ -473,10 +474,10 @@ public class ContactInfoCache implements ContactsAsyncHelper.OnImageLoadComplete
         if (MoKeeUtils.isSupportLanguage(true)) {
             CloudNumber.detect(displayNumber, new CloudNumber$Callback() {
                 @Override
-                public void onResult(final String phoneNumber, final String result, int responseCode, CloudNumber$Type type, Exception e) {
+                public void onResult(final String phoneNumber, final String result, CloudNumber$Type type, Exception e) {
                     cce.location = result;
                     info.geoDescription = result;
-                }}, context);
+                }}, ((DialerApplication)context.getApplicationContext()).getQueue(), context);
         } else {
                 cce.location = displayLocation;
         }
