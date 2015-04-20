@@ -108,6 +108,7 @@ public class StatusBarNotifier implements InCallPresenter.InCallStateListener {
     private String mSavedContentTitle;
 
     private static Handler mHandler = new Handler();
+    private String mSavedContactName;
     private long cloudSearchStartTime;
     private boolean cloudSearchFinished;
 
@@ -340,6 +341,7 @@ public class StatusBarNotifier implements InCallPresenter.InCallStateListener {
         mIsShowingNotification = true;
 
         if (TextUtils.isEmpty(contactInfo.location) && MoKeeUtils.isSupportLanguage(true)) {
+            if (!TextUtils.isEmpty(contactInfo.name)) mSavedContactName = contactInfo.name;
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -349,6 +351,7 @@ public class StatusBarNotifier implements InCallPresenter.InCallStateListener {
                     } else {
                         if (!TextUtils.isEmpty(contactInfo.location) && !cloudSearchFinished) {
                             cloudSearchFinished = true;
+                            contactInfo.name = mSavedContactName;
                             buildAndSendNotification(call, contactInfo);
                         }
                     }
