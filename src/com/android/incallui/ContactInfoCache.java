@@ -35,7 +35,6 @@ import android.telecom.TelecomManager;
 import android.text.TextUtils;
 
 import com.android.contacts.common.util.PhoneNumberHelper;
-import com.android.dialer.DialerApplication;
 import com.android.incallui.service.PhoneNumberService;
 import com.android.incalluibind.ServiceFactory;
 import com.android.services.telephony.common.MoreStrings;
@@ -477,7 +476,7 @@ public class ContactInfoCache implements ContactsAsyncHelper.OnImageLoadComplete
                 public void onResult(final String phoneNumber, final String result, CloudNumber$Type type, Exception e) {
                     cce.location = result;
                     info.geoDescription = result;
-                }}, ((DialerApplication)context.getApplicationContext()).getQueue(), context);
+                }}, context);
         } else {
                 cce.location = displayLocation;
         }
