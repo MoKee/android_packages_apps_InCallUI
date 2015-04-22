@@ -42,9 +42,8 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
-import com.mokee.cloud.CloudNumber;
-import com.mokee.cloud.CloudNumber$Callback;
-import com.mokee.cloud.CloudNumber$Type;
+import com.mokee.cloud.location.OfflineNumber;
+import com.mokee.cloud.misc.CloudUtils;
 
 import java.util.HashMap;
 import java.util.Set;
@@ -363,7 +362,7 @@ public class ContactInfoCache implements ContactsAsyncHelper.OnImageLoadComplete
     /**
      * Populate a cache entry from a call (which got converted into a caller info).
      */
-    public static void populateCacheEntry(Context context, final CallerInfo info, final ContactCacheEntry cce,
+    public static void populateCacheEntry(Context context, CallerInfo info, ContactCacheEntry cce,
             int presentation, boolean isIncoming) {
         Preconditions.checkNotNull(info);
         String displayName = null;
@@ -470,15 +469,11 @@ public class ContactInfoCache implements ContactsAsyncHelper.OnImageLoadComplete
 
         cce.name = displayName;
         cce.number = displayNumber;
-        if (MoKeeUtils.isSupportLanguage(true) && TextUtils.isEmpty(displayLocation)) {
-            CloudNumber.detect(displayNumber, new CloudNumber$Callback() {
-                @Override
-                public void onResult(final String phoneNumber, final String result, CloudNumber$Type type, Exception e) {
-                    cce.location = result;
-                    info.geoDescription = result;
-                }}, context);
+        if (MoKeeUtils.isSupportLanguage(true) && !isSipCall) {
+            info.geoDescription = OfflineNumber.getLocationInfo(context.getContentResolver(), CloudUtils.formatNumber(cce.number)).getLocation();
+            cce.location = info.geoDescription;
         } else {
-                cce.location = displayLocation;
+            cce.location = displayLocation;
         }
         cce.label = label;
         cce.isSipCall = isSipCall;

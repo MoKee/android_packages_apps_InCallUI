@@ -27,7 +27,6 @@ import android.media.AudioManager;
 import android.mokee.utils.MoKeeUtils;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.provider.Settings;
 import android.telecom.AudioState;
 import android.telecom.DisconnectCause;
@@ -81,10 +80,7 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi> i
     private CallTimer mCallTimer;
     private Context mContext;
 
-    private static Handler mHandler = new Handler();
     private static boolean isSupportLanguage;
-    private long cloudSearchStartTime;
-    private boolean cloudSearchFinished;
 
     private AudioManager mAudioManager;
 
@@ -159,8 +155,6 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi> i
         AudioModeProvider.getInstance().addListener(this);
 
         // Cloud Search Engine
-        cloudSearchStartTime = System.currentTimeMillis();
-        cloudSearchFinished = false;
         isSupportLanguage = MoKeeUtils.isSupportLanguage(true);
     }
 
@@ -208,8 +202,6 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi> i
             // getCallToDisplay doesn't go through outgoing or incoming calls. It will return the
             // highest priority call to display as the secondary call.
             secondary = getCallToDisplay(callList, null, true);
-
-            cloudSearchFinished = false;
         } else if (newState == InCallState.INCALL) {
             primary = getCallToDisplay(callList, null, false);
             secondary = getCallToDisplay(callList, primary, true);
@@ -584,7 +576,7 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi> i
             Log.d(TAG, "Update primary display info for " + mPrimaryContactInfo);
 
             String name = getNameForCall(mPrimaryContactInfo);
-            final String number = getNumberForCall(mPrimaryContactInfo);
+            String number = getNumberForCall(mPrimaryContactInfo);
             boolean nameIsNumber = name != null && name.equals(mPrimaryContactInfo.number);
             boolean isIncoming = mPrimary.getState() == Call.State.INCOMING;
             final boolean isForwarded = isForwarded(mPrimary);
@@ -603,25 +595,6 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi> i
                     mPrimaryContactInfo.organization,
                     mPrimaryContactInfo.position,
                     mPrimaryContactInfo.city);
-            if (TextUtils.isEmpty(mPrimaryContactInfo.location) && isSupportLanguage) {
-                mHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (mPrimaryContactInfo == null) return;
-                        if (TextUtils.isEmpty(mPrimaryContactInfo.location) && cloudSearchStartTime + 6000 > System.currentTimeMillis()) {
-                            mHandler.postDelayed(this, 100);
-                        } else {
-                            if (!TextUtils.isEmpty(mPrimaryContactInfo.location) && !cloudSearchFinished) {
-                                cloudSearchFinished = true;
-                                String number = getNumberForCall(mPrimaryContactInfo);
-                                String label = TextUtils.isEmpty(mPrimaryContactInfo.label) ? mPrimaryContactInfo.location : mPrimaryContactInfo.label + " " + mPrimaryContactInfo.location;
-                                ui.setCallNumberAndLabelView(number, label);
-                                ui.setPrimaryPhoneNumber(number);
-                                ui.setPrimaryLabel(label);
-                            }
-                        }
-                    }}, 100);
-            }
         } else {
             // Clear the primary display info.
             ui.setPrimary(null, null, false, false, null, null, false, null, null, null, null);
@@ -941,7 +914,6 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi> i
         void setVolumeBoostButtonState(boolean visible, boolean on);
         void showManageConferenceCallButton(boolean visible);
         boolean isManageConferenceVisible();
-        void setCallNumberAndLabelView(String number, String label);
     }
 
     public int getActiveSubscription() {

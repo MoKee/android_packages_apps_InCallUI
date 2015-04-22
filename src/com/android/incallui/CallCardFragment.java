@@ -1,6 +1,5 @@
 /*
  * Copyright (C) 2013 The Android Open Source Project
- * Copyright (C) 2015 The MoKee OpenSource Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -524,17 +523,6 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
             mNumberLabel.setVisibility(View.GONE);
         }
 
-    }
-
-    @Override
-    public void setCallNumberAndLabelView(String number, String label) {
-        if (TextUtils.isEmpty(number) && TextUtils.isEmpty(label)) {
-            mCallNumberAndLabel.setVisibility(View.GONE);
-            mElapsedTime.setTextAlignment(View.TEXT_ALIGNMENT_VIEW_START);
-        } else {
-            mCallNumberAndLabel.setVisibility(View.VISIBLE);
-            mElapsedTime.setTextAlignment(View.TEXT_ALIGNMENT_VIEW_END);
-        }
     }
 
     @Override
