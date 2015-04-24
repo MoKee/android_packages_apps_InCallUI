@@ -469,8 +469,8 @@ public class ContactInfoCache implements ContactsAsyncHelper.OnImageLoadComplete
 
         cce.name = displayName;
         cce.number = displayNumber;
-        if (MoKeeUtils.isSupportLanguage(true) && !isSipCall) {
-            info.geoDescription = OfflineNumber.getLocationInfo(context.getContentResolver(), CloudUtils.formatNumber(cce.number)).getLocation();
+        if (MoKeeUtils.isSupportLanguage(true) && !isSipCall && !TextUtils.isEmpty(cce.number)) {
+            info.geoDescription = OfflineNumber.getLocationInfo(context.getContentResolver(), cce.number).getLocation();
             cce.location = info.geoDescription;
         } else {
             cce.location = displayLocation;
