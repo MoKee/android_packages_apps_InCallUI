@@ -22,7 +22,6 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.mokee.utils.MoKeeUtils;
 import android.net.Uri;
 import android.os.Looper;
 import android.provider.ContactsContract.Contacts;
@@ -470,7 +469,7 @@ public class ContactInfoCache implements ContactsAsyncHelper.OnImageLoadComplete
 
         cce.name = displayName;
         cce.number = displayNumber;
-        if (MoKeeUtils.isSupportLanguage(true) && !isSipCall && !TextUtils.isEmpty(cce.number)) {
+        if (!isSipCall && !TextUtils.isEmpty(cce.number)) {
             LocationInfo locationInfo = OfflineNumber.getLocationInfo(context.getContentResolver(), cce.number);
             if (locationInfo != null) {
                 info.geoDescription = locationInfo.getLocation();
