@@ -22,6 +22,30 @@
       "revId": "d4c024b6fb5555dc3f8d817d0c23ebb16babe021",
       "serverId": "83d63960-fecf-4fd1-a7f6-e01518638a62",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bfb3d3c7_b7a89277",
+        "filename": "src/com/android/incallui/AnswerPresenter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 333,
+      "author": {
+        "id": 1026
+      },
+      "writtenOn": "2015-09-05T08:52:55Z",
+      "side": 1,
+      "message": "因为我对getActivePhoneId()内部增加了判断条件，修改后的返回值只能是对应“正在来电”的那张SIM卡id，而如果收到来电后，用户想要通过短信拒接来电，但是还没选定短信发送的时候对方挂断了电话的话，此时用getActivePhoneId()会返回-1（因为没有“正在来电”了），而-1不会对应到任何一张SIM卡。mInComingCallPhoneId永远只记录最后收到来电的那张卡的id，只可能为0或1。",
+      "parentUuid": "bfb3d3c7_f71daa0f",
+      "range": {
+        "startLine": 333,
+        "startChar": 14,
+        "endLine": 333,
+        "endChar": 55
+      },
+      "revId": "d4c024b6fb5555dc3f8d817d0c23ebb16babe021",
+      "serverId": "83d63960-fecf-4fd1-a7f6-e01518638a62",
+      "unresolved": false
     }
   ]
 }
