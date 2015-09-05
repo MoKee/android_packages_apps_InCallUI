@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bfb3d3c7_f71daa0f",
+        "filename": "src/com/android/incallui/AnswerPresenter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 333,
+      "author": {
+        "id": 1
+      },
+      "writtenOn": "2015-09-05T07:31:06Z",
+      "side": 1,
+      "message": "这里如果仍用int phoneId \u003d getActivePhoneId();去取值，会和mInComingCallPhoneId的结果有什么不同？",
+      "range": {
+        "startLine": 333,
+        "startChar": 14,
+        "endLine": 333,
+        "endChar": 55
+      },
+      "revId": "d4c024b6fb5555dc3f8d817d0c23ebb16babe021",
+      "serverId": "83d63960-fecf-4fd1-a7f6-e01518638a62",
+      "unresolved": false
+    }
+  ]
+}
