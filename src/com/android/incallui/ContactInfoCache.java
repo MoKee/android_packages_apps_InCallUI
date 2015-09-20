@@ -42,7 +42,7 @@ import com.google.common.collect.Sets;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.mokee.cloud.location.LocationInfo;
-import com.mokee.cloud.location.OfflineNumber;
+import com.mokee.cloud.location.LocationUtils;
 import com.mokee.cloud.misc.CloudUtils;
 
 import java.util.HashMap;
@@ -470,7 +470,7 @@ public class ContactInfoCache implements ContactsAsyncHelper.OnImageLoadComplete
         cce.name = displayName;
         cce.number = displayNumber;
         if (!isSipCall && !TextUtils.isEmpty(cce.number)) {
-            LocationInfo locationInfo = OfflineNumber.getLocationInfo(context.getContentResolver(), cce.number);
+            LocationInfo locationInfo = LocationUtils.getLocationInfo(context.getContentResolver(), cce.number);
             if (locationInfo != null) {
                 info.geoDescription = locationInfo.getLocation();
                 cce.location = info.geoDescription;
