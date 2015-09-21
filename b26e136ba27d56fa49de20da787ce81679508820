@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9fb8cfa7_2a267fb9",
+        "filename": "src/com/android/incallui/InCallPresenter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 310,
+      "author": {
+        "id": 1
+      },
+      "writtenOn": "2015-09-21T03:59:21Z",
+      "side": 1,
+      "message": "去这个方法的if内和外中加个log，看看按HOME键后是否立刻执行以及是否跳过条件",
+      "range": {
+        "startLine": 310,
+        "startChar": 28,
+        "endLine": 310,
+        "endChar": 34
+      },
+      "revId": "b26e136ba27d56fa49de20da787ce81679508820",
+      "serverId": "83d63960-fecf-4fd1-a7f6-e01518638a62",
+      "unresolved": false
+    }
+  ]
+}
