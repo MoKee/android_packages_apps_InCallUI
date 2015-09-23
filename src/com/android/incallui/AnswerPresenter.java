@@ -35,7 +35,6 @@ public class AnswerPresenter extends Presenter<AnswerPresenter.AnswerUi>
     private String mCallId[] = new String[CallList.PHONE_COUNT];
     private Call mCall[] = new Call[CallList.PHONE_COUNT];
     private boolean mHasTextMessages = false;
-    private int mInComingCallPhoneId;
 
     @Override
     public void onUiReady(AnswerUi ui) {
@@ -146,7 +145,6 @@ public class AnswerPresenter extends Presenter<AnswerPresenter.AnswerUi>
     private void processIncomingCall(Call call) {
         int subId = call.getSubId();
         int phoneId = CallList.getInstance().getPhoneId(subId);
-        mInComingCallPhoneId = phoneId;
         mCallId[phoneId] = call.getId();
         mCall[phoneId] = call;
 
@@ -249,9 +247,10 @@ public class AnswerPresenter extends Presenter<AnswerPresenter.AnswerUi>
             phoneId = CallList.getInstance().getPhoneId(subId);
         } else {
             for (int i = 0; i < mCall.length; i++) {
-                // Need to check call state, an IDLE call can not be answered or declined.
-                if ((mCall[i] != null) && (mCall[i].getState() != Call.State.IDLE)) {
+                if ((mCall[i] != null) && ((mCall[i].getState() == Call.State.INCOMING)
+                        || (mCall[i].getState() == Call.State.CALL_WAITING))) {
                     phoneId = i;
+                    break;
                 }
             }
         }
@@ -331,9 +330,9 @@ public class AnswerPresenter extends Presenter<AnswerPresenter.AnswerUi>
     }
 
     public void rejectCallWithMessage(String message) {
-        Log.i(this, "sendTextToDefaultActivity()...phoneId:" + mInComingCallPhoneId);
-        // Reject last inComingCall with message.
-        TelecomAdapter.getInstance().rejectCall(mCall[mInComingCallPhoneId].getId(), true, message);
+        int phoneId = getActivePhoneId();
+        Log.i(this, "sendTextToDefaultActivity()...phoneId:" + phoneId);
+        TelecomAdapter.getInstance().rejectCall(mCall[phoneId].getId(), true, message);
 
         onDismissDialog();
     }
