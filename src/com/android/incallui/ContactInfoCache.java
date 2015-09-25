@@ -470,7 +470,7 @@ public class ContactInfoCache implements ContactsAsyncHelper.OnImageLoadComplete
         cce.name = displayName;
         cce.number = displayNumber;
         if (!isSipCall && !TextUtils.isEmpty(cce.number)) {
-            LocationInfo locationInfo = LocationUtils.getLocationInfo(context.getContentResolver(), cce.number);
+            LocationInfo locationInfo = LocationUtils.getLocationInfo(context.getContentResolver(), CloudUtils.formatNumber(cce.number));
             if (locationInfo != null) {
                 info.geoDescription = locationInfo.getLocation();
                 cce.location = info.geoDescription;

@@ -249,9 +249,11 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi> i
         if (mPrimary != null && mPrimary.getState() == Call.State.ACTIVE) {
             Log.d(this, "Starting the calltime timer");
             mCallTimer.start(CALL_TIME_UPDATE_INTERVAL_MS);
+            ui.setMarkSnackBar(mPrimaryContactInfo.number);
         } else {
             Log.d(this, "Canceling the calltime timer");
             mCallTimer.cancel();
+            ui.setMarkSnackBar(null);
             ui.setPrimaryCallElapsedTime(false, 0);
         }
 
@@ -922,6 +924,7 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi> i
         void setVolumeBoostButtonState(boolean visible, boolean on);
         void showManageConferenceCallButton(boolean visible);
         boolean isManageConferenceVisible();
+        void setMarkSnackBar(String number);
     }
 
     public int getActiveSubscription() {
