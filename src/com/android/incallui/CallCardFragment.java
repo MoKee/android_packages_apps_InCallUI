@@ -1302,7 +1302,6 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
                         .actionLabel(R.string.call_log_action_user_mark).actionListener(new ActionClickListener(){
                             @Override
                             public void onActionClicked(Snackbar snackbar) {
-                                snackbar.setMaxHeight(40);
                                 Intent intent = new Intent(getActivity(), MiniMarkActivity.class);
                                 intent.putExtra("number", formatNumber);
                                 DialerUtils.startActivityWithErrorToast(getActivity(), intent);
