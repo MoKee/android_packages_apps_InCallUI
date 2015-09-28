@@ -29,7 +29,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
-import android.mokee.utils.MoKeeUtils;
 import android.os.Handler;
 import android.os.Message;
 import android.telecom.PhoneAccount;
@@ -406,22 +405,13 @@ public class StatusBarNotifier implements InCallPresenter.InCallStateListener {
                 && !call.can(android.telecom.Call.Details.CAPABILITY_GENERIC_CONFERENCE)) {
             return mContext.getResources().getString(R.string.card_title_conf_call);
         }
-        if (MoKeeUtils.isSupportLanguage(true)) {
-            if (TextUtils.isEmpty(contactInfo.name)) {
-                return TextUtils.isEmpty(contactInfo.number) ? null
-                        : TextUtils.isEmpty(contactInfo.location) ? BidiFormatter.getInstance().unicodeWrap(
-                            contactInfo.number.toString(), TextDirectionHeuristics.LTR) : BidiFormatter.getInstance().unicodeWrap(
-                                    contactInfo.number.toString() + " " + contactInfo.location, TextDirectionHeuristics.LTR);
-            }
-            return !TextUtils.isEmpty(contactInfo.location) ? contactInfo.name + " " + contactInfo.location : contactInfo.name;
-        } else {
-            if (TextUtils.isEmpty(contactInfo.name)) {
-                return TextUtils.isEmpty(contactInfo.number) ? null
-                        : BidiFormatter.getInstance().unicodeWrap(
-                            contactInfo.number.toString(), TextDirectionHeuristics.LTR);
-            }
-            return contactInfo.name;
+        if (TextUtils.isEmpty(contactInfo.name)) {
+            return TextUtils.isEmpty(contactInfo.number) ? null
+                    : TextUtils.isEmpty(contactInfo.location) ? BidiFormatter.getInstance().unicodeWrap(
+                        contactInfo.number.toString(), TextDirectionHeuristics.LTR) : BidiFormatter.getInstance().unicodeWrap(
+                                contactInfo.number.toString() + " " + contactInfo.location, TextDirectionHeuristics.LTR);
         }
+        return !TextUtils.isEmpty(contactInfo.location) ? contactInfo.name + " " + contactInfo.location : contactInfo.name;
     }
 
     private void addPersonReference(Notification.Builder builder, ContactCacheEntry contactInfo,

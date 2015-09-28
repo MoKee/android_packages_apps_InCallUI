@@ -24,7 +24,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
-import android.mokee.utils.MoKeeUtils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -79,9 +78,6 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi> i
     private ContactCacheEntry mSecondaryContactInfo;
     private CallTimer mCallTimer;
     private Context mContext;
-
-    private static boolean isSupportLanguage;
-
     private AudioManager mAudioManager;
 
     public static class ContactLookupCallback implements ContactInfoCacheCallback {
@@ -153,9 +149,6 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi> i
         InCallPresenter.getInstance().addDetailsListener(this);
         InCallPresenter.getInstance().addInCallEventListener(this);
         AudioModeProvider.getInstance().addListener(this);
-
-        // Cloud Search Engine
-        isSupportLanguage = MoKeeUtils.isSupportLanguage(true);
     }
 
     @Override
@@ -588,9 +581,9 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi> i
                     checkIdpName,
                     nameIsNumber,
                     isForwarded,
-                    isSupportLanguage ? TextUtils.isEmpty(mPrimaryContactInfo.label) ? mPrimaryContactInfo.location :
+                    TextUtils.isEmpty(mPrimaryContactInfo.label) ? mPrimaryContactInfo.location :
                         TextUtils.isEmpty(mPrimaryContactInfo.location) ? mPrimaryContactInfo.label : mPrimaryContactInfo.label + " "
-                            + mPrimaryContactInfo.location : mPrimaryContactInfo.label,
+                            + mPrimaryContactInfo.location,
                     mPrimaryContactInfo.photo,
                     mPrimaryContactInfo.isSipCall,
                     mPrimaryContactInfo.nickName,
@@ -781,11 +774,7 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi> i
         // If the name is empty, we use the number for the name...so dont show a second
         // number in the number field
         if (TextUtils.isEmpty(contactInfo.name)) {
-            if (!isSupportLanguage) {
-                return contactInfo.location;
-            } else {
-                return "";
-            }
+            return "";
         }
         return contactInfo.number;
     }
