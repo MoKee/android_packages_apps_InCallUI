@@ -1306,7 +1306,7 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
                                 intent.putExtra("number", formatNumber);
                                 DialerUtils.startActivityWithErrorToast(getActivity(), intent);
                             }})
-                        .text(R.string.cloud_location_lookup_mark_as).colorResource(R.color.dialer_theme_color_dark));
+                        .text(R.string.cloud_location_lookup_mark_as));
             }
         } else {
             if (SnackbarManager.getCurrentSnackbar() != null) {
