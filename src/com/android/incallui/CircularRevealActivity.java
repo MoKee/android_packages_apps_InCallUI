@@ -101,6 +101,7 @@ public class CircularRevealActivity extends Activity {
             view.findViewById(R.id.outgoing_call_animation_circle).setBackgroundColor(
                     palette.mPrimaryColor);
             getWindow().setStatusBarColor(palette.mSecondaryColor);
+            getWindow().setNavigationBarColor(palette.mSecondaryColor);
         }
 
         view.getViewTreeObserver().addOnPreDrawListener(new OnPreDrawListener() {

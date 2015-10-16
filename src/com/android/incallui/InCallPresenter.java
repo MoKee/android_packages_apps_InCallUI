@@ -1556,6 +1556,7 @@ public class InCallPresenter implements CallList.Listener,
         }
 
         mInCallActivity.getWindow().setStatusBarColor(mThemeColors.mSecondaryColor);
+        mInCallActivity.getWindow().setNavigationBarColor(mThemeColors.mSecondaryColor);
     }
 
     /**
