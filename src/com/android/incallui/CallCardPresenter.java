@@ -53,6 +53,8 @@ import java.lang.ref.WeakReference;
 
 import com.google.common.base.Preconditions;
 
+import mokee.support.widget.snackbar.Snackbar;
+
 /**
  * Presenter for the Call Card Fragment.
  * <p>
@@ -242,7 +244,14 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi> i
         if (mPrimary != null && mPrimary.getState() == Call.State.ACTIVE) {
             Log.d(this, "Starting the calltime timer");
             mCallTimer.start(CALL_TIME_UPDATE_INTERVAL_MS);
-            ui.setMarkSnackBar(mPrimaryContactInfo.number);
+            if (ui.getMarkSnackBar() == null && mPrimaryContactInfo != null) {
+                String name = getNameForCall(mPrimaryContactInfo);
+                String number = getNumberForCall(mPrimaryContactInfo);
+                boolean nameIsNumber = name != null && name.equals(mPrimaryContactInfo.number);
+                if (nameIsNumber) {
+                    ui.setMarkSnackBar(mPrimaryContactInfo.number);
+                }
+            }
         } else {
             Log.d(this, "Canceling the calltime timer");
             mCallTimer.cancel();
@@ -914,6 +923,7 @@ public class CallCardPresenter extends Presenter<CallCardPresenter.CallCardUi> i
         void showManageConferenceCallButton(boolean visible);
         boolean isManageConferenceVisible();
         void setMarkSnackBar(String number);
+        Snackbar getMarkSnackBar();
     }
 
     public int getActiveSubscription() {

@@ -1309,10 +1309,15 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
                         .text(R.string.cloud_location_lookup_mark_as));
             }
         } else {
-            if (SnackbarManager.getCurrentSnackbar() != null) {
-                SnackbarManager.getCurrentSnackbar().dismiss();
+            if (getMarkSnackBar() != null) {
+                getMarkSnackBar().dismiss();
             }
         }
+    }
+
+    @Override
+    public Snackbar getMarkSnackBar() {
+        return SnackbarManager.getCurrentSnackbar();
     }
 
 }
