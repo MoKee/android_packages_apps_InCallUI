@@ -1652,6 +1652,7 @@ public class InCallPresenter implements CallList.Listener,
         }
 
         mInCallActivity.getWindow().setStatusBarColor(color);
+        mInCallActivity.getWindow().setNavigationBarColor(color);
         final TaskDescription td = new TaskDescription(
                 resources.getString(R.string.notification_ongoing_call), null, color);
         mInCallActivity.setTaskDescription(td);
