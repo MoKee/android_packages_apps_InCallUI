@@ -32,7 +32,6 @@ import org.codeaurora.ims.qtiims.IQtiImsInterface;
 import org.codeaurora.ims.qtiims.IQtiImsInterfaceListener;
 import org.codeaurora.ims.qtiims.QtiImsInterfaceUtils;
 import org.codeaurora.ims.qtiims.QtiViceInfo;
-import org.codeaurora.QtiVideoCallConstants;
 
 import java.util.List;
 
@@ -55,6 +54,7 @@ public class AnswerPresenter extends Presenter<AnswerPresenter.AnswerUi>
     private String mCallId[] = new String[InCallServiceImpl.sPhoneCount];
     private Call mCall[] = new Call[InCallServiceImpl.sPhoneCount];
     private final CallList mCalls = CallList.getInstance();
+    private Call mLastIncomingCall;
     private boolean mHasTextMessages = false;
     private BlockContactHelper mBlockContactHelper;
 
@@ -329,6 +329,7 @@ public class AnswerPresenter extends Presenter<AnswerPresenter.AnswerUi>
     private void processIncomingCall(Call call) {
         int subId = call.getSubId();
         int phoneId = mCalls.getPhoneId(subId);
+        mLastIncomingCall = call;
         mCallId[phoneId] = call.getId();
         mCall[phoneId] = call;
         mCalls.addListener(this);
@@ -529,7 +530,16 @@ public class AnswerPresenter extends Presenter<AnswerPresenter.AnswerUi>
     public void rejectCallWithMessage(String message) {
         int phoneId = getActivePhoneId();
         Log.i(this, "sendTextToDefaultActivity()...phoneId:" + phoneId);
-        TelecomAdapter.getInstance().rejectCall(mCall[phoneId].getId(), true, message);
+        if (phoneId >= 0) {
+            // Reject last incomingCall with message.
+            TelecomAdapter.getInstance().rejectCall(mCall[phoneId].getId(), true, message);
+        } else {
+            // if call is disconnected, send message to last incomingCall number
+            Log.i(this, "send message after call disconnect");
+            TelecomAdapter.getInstance().sendMessageAfterCallDisconnect(getUi().getContext(),
+                    mLastIncomingCall.getHandle().getSchemeSpecificPart(), message,
+                    mLastIncomingCall.getSubId());
+        }
 
         onDismissDialog();
     }
