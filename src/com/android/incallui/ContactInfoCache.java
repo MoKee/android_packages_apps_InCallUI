@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2013 The Android Open Source Project
+ * Copyright (C) 2013-2016 The MoKee Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +46,10 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
+
+import com.mokee.cloud.location.LocationInfo;
+import com.mokee.cloud.location.LocationUtils;
+import com.mokee.cloud.misc.CloudUtils;
 
 import java.util.HashMap;
 import java.util.Set;
@@ -466,13 +471,13 @@ public class ContactInfoCache implements ContactsAsyncHelper.OnImageLoadComplete
 
                     // Display a geographical description string if available
                     // (but only for incoming calls.)
-                    if (isIncoming) {
+                    // if (isIncoming) {
                         // TODO (CallerInfoAsyncQuery cleanup): Fix the CallerInfo
                         // query to only do the geoDescription lookup in the first
                         // place for incoming calls.
                         displayLocation = info.geoDescription; // may be null
                         Log.d(TAG, "Geodescrption: " + info.geoDescription);
-                    }
+                    // }
 
                     Log.d(TAG, "  ==>  no name; falling back to number:"
                             + " displayNumber '" + Log.pii(displayNumber)
@@ -491,15 +496,26 @@ public class ContactInfoCache implements ContactsAsyncHelper.OnImageLoadComplete
                 } else {
                     displayName = info.name;
                     displayNumber = number;
+                    displayLocation = info.geoDescription;
                     label = info.phoneLabel;
                     Log.d(TAG, "  ==>  name is present in CallerInfo: displayName '" + displayName
-                            + "', displayNumber '" + displayNumber + "'");
+                            + "', displayNumber '" + displayNumber + "'" + "', displayLocation '" + displayLocation + "'");
                 }
             }
 
         cce.name = displayName;
         cce.number = displayNumber;
-        cce.location = displayLocation;
+        if (!isSipCall && !TextUtils.isEmpty(cce.number)) {
+            LocationInfo locationInfo = LocationUtils.getLocationInfo(context.getContentResolver(), CloudUtils.formatNumber(cce.number));
+            if (locationInfo != null) {
+                info.geoDescription = locationInfo.getLocation();
+                cce.location = info.geoDescription;
+            } else {
+               cce.location = displayLocation;
+            }
+        } else {
+            cce.location = displayLocation;
+        }
         cce.label = label;
         cce.isSipCall = isSipCall;
     }
