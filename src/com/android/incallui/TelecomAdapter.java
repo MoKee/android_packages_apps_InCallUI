@@ -103,6 +103,15 @@ final class TelecomAdapter implements InCallServiceListener {
         Toast.makeText(context, confirmationMsg,Toast.LENGTH_LONG).show();
     }
 
+    void answerCall(String callId, int videoState, int callWaitingResponseType) {
+        android.telecom.Call call = getTelecommCallById(callId);
+        if (call != null) {
+            call.answer(videoState, callWaitingResponseType);
+        } else {
+            Log.e(this, "error answerCall, call not in call list: " + callId);
+        }
+    }
+
     void rejectCall(String callId, boolean rejectWithMessage, String message) {
         android.telecom.Call call = getTelecommCallById(callId);
         if (call != null) {
