@@ -161,7 +161,8 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
 
     private View mPhotoContainer;
     private TextView mLookupStatusMessage;
-    private TextView mContactInfoAttribution;
+    private TextView mContactInfoAttributionText;
+    private ImageView mContactInfoAttributionLogo;
     private TextView mSpamInfoView;
 
     // Dark number info bar
@@ -345,7 +346,8 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
         mCallSubject = (TextView) view.findViewById(R.id.callSubject);
 
         mLookupStatusMessage = (TextView) view.findViewById(R.id.lookupStatusMessage);
-        mContactInfoAttribution = (TextView) view.findViewById(R.id.contactInfoAttribution);
+        mContactInfoAttributionText = (TextView) view.findViewById(R.id.contactInfoAttributionText);
+        mContactInfoAttributionLogo = (ImageView) view.findViewById(R.id.contactInfoAttributionLogo);
         mSpamInfoView = (TextView) view.findViewById(R.id.spamInfo);
         mPhotoContainer = view.findViewById(R.id.call_card_content);
 
@@ -1371,13 +1373,9 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
         } else {
             switch (lookupStatus) {
                 case SUCCESS:
-                    mContactInfoAttribution.setText(
+                    mContactInfoAttributionText.setText(
                             res.getString(R.string.powered_by_provider, providerName));
-                    int logoSize = res.getDimensionPixelSize(R.dimen.contact_info_attribution_logo_size);
-                    int logoPadding = res.getDimensionPixelSize(R.dimen.contact_info_attribution_logo_padding);
-                    providerLogo.setBounds(0, 0, logoSize, logoSize);
-                    mContactInfoAttribution.setCompoundDrawablesRelative(providerLogo, null, null, null);
-                    mContactInfoAttribution.setCompoundDrawablePadding(logoPadding);
+                    mContactInfoAttributionLogo.setImageDrawable(providerLogo);
                     showContactAttribution = true;
                     showLookupStatus = false;
                     break;
@@ -1405,7 +1403,7 @@ public class CallCardFragment extends BaseFragment<CallCardPresenter, CallCardPr
             }
         }
         mLookupStatusMessage.setVisibility(showLookupStatus ? View.VISIBLE : View.GONE);
-        mContactInfoAttribution.setVisibility(showContactAttribution ? View.VISIBLE : View.GONE);
+        mContactInfoAttributionText.setVisibility(showContactAttribution ? View.VISIBLE : View.GONE);
     }
 
     public void onDialpadVisibilityChange(boolean isShown) {
