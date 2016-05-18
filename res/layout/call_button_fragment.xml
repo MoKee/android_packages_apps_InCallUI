@@ -94,7 +94,8 @@
         <ToggleButton android:id="@+id/holdButton"
             style="@style/InCallCompoundButton"
             android:background="@drawable/btn_compound_hold"
-            android:contentDescription="@string/onscreenHoldText_unselected" />
+            android:contentDescription="@string/onscreenHoldText_unselected"
+            android:visibility="gone"/>
 
         <!-- "Swap" (or "Manage calls" in some CDMA states) -->
         <ImageButton android:id="@+id/swapButton"
