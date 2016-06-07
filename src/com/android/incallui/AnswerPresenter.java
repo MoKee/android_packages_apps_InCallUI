@@ -448,6 +448,10 @@ public class AnswerPresenter extends Presenter<AnswerPresenter.AnswerUi>
     public void onDecline(Context context) {
         int phoneId = getActivePhoneId();
         Log.d(this, "onDecline mCallId:" + mCallId + "phoneId:" + phoneId);
+        if (phoneId == -1) {
+            return;
+        }
+
         if (mCall[phoneId].getSessionModificationState()
                 == Call.SessionModificationState.RECEIVED_UPGRADE_TO_VIDEO_REQUEST) {
             InCallPresenter.getInstance().declineUpgradeRequest(context);
@@ -478,6 +482,10 @@ public class AnswerPresenter extends Presenter<AnswerPresenter.AnswerUi>
     public void onBlockDialogInitialize() {
         int phoneId = getActivePhoneId();
         Log.d(this, "onBlock mCallId:" + mCallId + "phoneId:" + phoneId);
+        if (phoneId == -1) {
+            return;
+        }
+
         Call call = mCall[phoneId];
         final String number = call.getNumber();
         final Context context = getUi().getContext();
@@ -519,17 +527,15 @@ public class AnswerPresenter extends Presenter<AnswerPresenter.AnswerUi>
 
     public void rejectCallWithMessage(String message) {
         int phoneId = getActivePhoneId();
-        Log.i(this, "sendTextToDefaultActivity()...phoneId:" + phoneId);
-        if (phoneId >= 0) {
-            // Reject last incomingCall with message.
-            TelecomAdapter.getInstance().rejectCall(mCall[phoneId].getId(), true, message);
-        } else {
-            // if call is disconnected, send message to last incomingCall number
-            Log.i(this, "send message after call disconnect");
+        Log.i(this, "rejectCallWithMessage phoneId:" + phoneId);
+        if (phoneId == -1) {
             TelecomAdapter.getInstance().sendMessageAfterCallDisconnect(getUi().getContext(),
                     mLastIncomingCall.getHandle().getSchemeSpecificPart(), message,
                     mLastIncomingCall.getSubId());
+            return;
         }
+
+        TelecomAdapter.getInstance().rejectCall(mCall[phoneId].getId(), true, message);
 
         onDismissDialog();
     }
