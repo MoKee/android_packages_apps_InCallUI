@@ -532,11 +532,9 @@ public class AnswerPresenter extends Presenter<AnswerPresenter.AnswerUi>
             TelecomAdapter.getInstance().sendMessageAfterCallDisconnect(getUi().getContext(),
                     mLastIncomingCall.getHandle().getSchemeSpecificPart(), message,
                     mLastIncomingCall.getSubId());
-            return;
+        } else {
+            TelecomAdapter.getInstance().rejectCall(mCall[phoneId].getId(), true, message);
         }
-
-        TelecomAdapter.getInstance().rejectCall(mCall[phoneId].getId(), true, message);
-
         onDismissDialog();
     }
 
