@@ -528,12 +528,12 @@ public class AnswerPresenter extends Presenter<AnswerPresenter.AnswerUi>
     public void rejectCallWithMessage(String message) {
         int phoneId = getActivePhoneId();
         Log.i(this, "rejectCallWithMessage phoneId:" + phoneId);
-        if (phoneId == -1) {
+        if (phoneId != -1) {
+            TelecomAdapter.getInstance().rejectCall(mCall[phoneId].getId(), true, message);
+        } else {
             TelecomAdapter.getInstance().sendMessageAfterCallDisconnect(getUi().getContext(),
                     mLastIncomingCall.getHandle().getSchemeSpecificPart(), message,
                     mLastIncomingCall.getSubId());
-        } else {
-            TelecomAdapter.getInstance().rejectCall(mCall[phoneId].getId(), true, message);
         }
         onDismissDialog();
     }
