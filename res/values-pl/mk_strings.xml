@@ -16,5 +16,5 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- AnswerFragment for send messages -->
-  <string name="respond_via_sms_confirmation_format">Wiadomość została wysłana do <xliff:g id="phone_number">%s</xliff:g>.</string>
+  <string name="respond_via_sms_confirmation_format">Wiadomość wysłana do <xliff:g id="phone_number">%s</xliff:g>.</string>
 </resources>
