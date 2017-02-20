@@ -562,10 +562,8 @@ public class ModButtonPresenter extends Presenter<ModButtonPresenter.ModButtonUi
             };
 
     private boolean isDeviceProvisionedInSettingsDb(Context context) {
-        return (MKSettings.Secure.getInt(context.getContentResolver(),
-                MKSettings.Secure.MK_SETUP_WIZARD_COMPLETED, 0) != 0) &&
-                (Settings.Global.getInt(context.getContentResolver(),
-                        Settings.Global.DEVICE_PROVISIONED, 0) != 0);
+        return Settings.Global.getInt(context.getContentResolver(),
+                Settings.Global.DEVICE_PROVISIONED, 0) != 0;
     }
 
     private class NoteCallInfo {
